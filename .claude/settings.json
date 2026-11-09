@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm test:*)",
+      "Bash(pnpm vitest:*)",
+      "Bash(pnpm typecheck)",
+      "Bash(pnpm lint)",
+      "Bash(pnpm build)",
+      "Bash(npx playwright test:*)"
+    ],
+    "deny": ["Bash(pnpm drizzle-kit push:*)", "Read(./.env.local)", "Read(./.env.production)"]
+  },
+  "hooks": {
+    "PreToolUse": [
+      { "matcher": "Write|Edit", "hooks": [{ "type": "command", "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/guard-secrets.sh" }] }
+    ],
+    "PostToolUse": [
+      { "matcher": "Write|Edit", "hooks": [{ "type": "command", "command": "cd \"$CLAUDE_PROJECT_DIR\" && npx tsc --noEmit -p . >/dev/null 2>&1 || echo 'Aviso: errores de TypeScript tras la edición (pnpm typecheck)' >&2; exit 0" }] }
+    ]
+  },
+  "enableAllProjectMcpServers": false
+}

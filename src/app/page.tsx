@@ -1,69 +1,52 @@
-import Image from "next/image";
+import Link from "next/link";
+import { BookOpenCheck, Brain, CalendarClock, FileText, Layers, Target } from "lucide-react";
+import { Logo } from "@/components/logo";
+import { buttonClass } from "@/components/ui";
 
-export default function Home() {
+const FEATURES = [
+  { icon: FileText, title: "Tus apuntes, primero", text: "Sube PDF, Word o texto. Triff los organiza por temas y cita la página de cada respuesta." },
+  { icon: Brain, title: "Tutora que enseña", text: "Explica, resuelve paso a paso o te guía con preguntas socráticas sin darte la solución." },
+  { icon: CalendarClock, title: "Plan hasta el examen", text: "Reparte el temario según tu fecha, tu tiempo y lo que ya dominas. Se ajusta solo." },
+  { icon: Layers, title: "Repaso espaciado", text: "Tarjetas con FSRS: repasas justo antes de olvidar, nunca después del examen." },
+  { icon: BookOpenCheck, title: "Cuestionarios con fuente", text: "Opción múltiple y verdadero/falso con explicación y referencia a tus apuntes." },
+  { icon: Target, title: "Dominio real", text: "Medimos tu dominio con evidencias de varios formatos, no con un único test." },
+];
+
+export default function Landing() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
+    <div className="mx-auto max-w-6xl px-4 sm:px-6">
+      <header className="flex h-16 items-center justify-between">
+        <Logo />
+        <nav className="flex items-center gap-2">
+          <Link href="/login" className={buttonClass("ghost")}>Entrar</Link>
+          <Link href="/register" className={buttonClass("primary")}>Crear cuenta</Link>
+        </nav>
+      </header>
+      <main>
+        <section className="rise py-16 sm:py-24">
+          <p className="mb-4 inline-flex rounded-full bg-accent-soft px-3 py-1 text-sm font-medium text-accent">Profesora particular · Preparadora de exámenes</p>
+          <h1 className="font-display max-w-3xl text-4xl leading-tight font-semibold sm:text-6xl">
+            Estudia con alguien que conoce tu temario y sabe qué te falta.
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="mt-5 max-w-2xl text-lg text-ink-2">
+            Triff convierte tus apuntes en un plan de estudio, explicaciones adaptadas, tarjetas y cuestionarios — y mide cuánto dominas cada tema hasta el día del examen.
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link href="/register" className={buttonClass("primary", "lg")}>Empezar gratis</Link>
+            <Link href="/login" className={buttonClass("secondary", "lg")}>Ya tengo cuenta</Link>
+          </div>
+        </section>
+        <section className="grid gap-4 pb-24 sm:grid-cols-2 lg:grid-cols-3">
+          {FEATURES.map(({ icon: Icon, title, text }) => (
+            <div key={title} className="card p-6">
+              <Icon className="mb-3 h-6 w-6 text-primary" aria-hidden />
+              <h2 className="font-semibold">{title}</h2>
+              <p className="mt-1.5 text-sm text-ink-2">{text}</p>
+            </div>
+          ))}
+        </section>
       </main>
+      <footer className="border-t border-border py-8 text-sm text-ink-3">© {new Date().getFullYear()} Triff · Proyecto en desarrollo</footer>
     </div>
   );
 }
