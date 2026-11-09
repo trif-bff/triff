@@ -1,0 +1,149 @@
+@import "tailwindcss";
+
+/*
+ * Triff design tokens.
+ * Identity: "luz sobre papel" — warm paper surfaces, deep ink text, an indigo
+ * primary for intelligence/trust and a lamp-amber accent reserved for progress
+ * and achievement. Mastery uses a 5-step scale that is distinguishable without
+ * colour too (labels + icons are always shown alongside).
+ */
+:root {
+  --bg: #f7f5f0;
+  --surface: #ffffff;
+  --surface-2: #f0ede6;
+  --border: #e3ded3;
+  --ink: #1b1a2e;
+  --ink-2: #4a4860;
+  --ink-3: #6e6b80;
+  --primary: #4f46c8;
+  --primary-ink: #ffffff;
+  --primary-soft: #e9e7fb;
+  --accent: #c9821f;
+  --accent-soft: #fbefdc;
+  --success: #1f8a5b;
+  --danger: #c2413b;
+  --danger-soft: #fbe5e3;
+  --m0: #c9c5d6;
+  --m1: #e0866b;
+  --m2: #e2b04a;
+  --m3: #7fb36a;
+  --m4: #2f8f6b;
+  --ring: #4f46c8;
+  --shadow: 0 1px 2px rgb(27 26 46 / 0.04), 0 4px 16px rgb(27 26 46 / 0.06);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12111f;
+    --surface: #1b1a2c;
+    --surface-2: #232238;
+    --border: #2f2d47;
+    --ink: #eeecf7;
+    --ink-2: #bdbad0;
+    --ink-3: #9a97b0;
+    --primary: #8f87ff;
+    --primary-ink: #12111f;
+    --primary-soft: #2a2752;
+    --accent: #f0b04f;
+    --accent-soft: #3a2d17;
+    --success: #4cc28d;
+    --danger: #f07a72;
+    --danger-soft: #3b1f22;
+    --m0: #4a4763;
+    --ring: #8f87ff;
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px rgb(0 0 0 / 0.25);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #12111f;
+  --surface: #1b1a2c;
+  --surface-2: #232238;
+  --border: #2f2d47;
+  --ink: #eeecf7;
+  --ink-2: #bdbad0;
+  --ink-3: #9a97b0;
+  --primary: #8f87ff;
+  --primary-ink: #12111f;
+  --primary-soft: #2a2752;
+  --accent: #f0b04f;
+  --accent-soft: #3a2d17;
+  --success: #4cc28d;
+  --danger: #f07a72;
+  --danger-soft: #3b1f22;
+  --m0: #4a4763;
+  --ring: #8f87ff;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px rgb(0 0 0 / 0.25);
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-primary: var(--primary);
+  --color-primary-ink: var(--primary-ink);
+  --color-primary-soft: var(--primary-soft);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  --radius-card: 1.1rem;
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--ink);
+}
+
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow);
+}
+
+.prose-tutor p { margin: 0.5em 0; line-height: 1.65; }
+.prose-tutor h1, .prose-tutor h2, .prose-tutor h3 { font-weight: 650; margin: 0.9em 0 0.3em; }
+.prose-tutor ul { list-style: disc; padding-left: 1.3em; }
+.prose-tutor ol { list-style: decimal; padding-left: 1.3em; }
+.prose-tutor code { background: var(--surface-2); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
+.prose-tutor pre { background: var(--surface-2); padding: 0.8em; border-radius: 8px; overflow-x: auto; }
+.prose-tutor blockquote { border-left: 3px solid var(--accent); padding-left: 0.8em; color: var(--ink-2); margin: 0.6em 0; }
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+.rise { animation: rise 0.35s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
