@@ -16,6 +16,10 @@ Todas las rutas requieren sesión (cookie de Better Auth). Las mutaciones valida
 
 Las respuestas de `review`, `quiz/:id/submit` (práctica y simulacro) y `documents` incluyen `rewards: { xp, badges: [{ id, name }], challengesCompleted: string[] }`.
 
+Panel de administración (server actions en `src/app/(admin)/admin/actions.ts`, permisos comprobados también en `src/lib/services/admin.ts`): `changeRole`, `changePlan`, `suspendUser`, `updateSettings`. Páginas `/admin`, `/admin/users`, `/admin/usage`, `/admin/settings`, `/admin/errors` (404 para quien no sea staff).
+
+CLI: `pnpm admin:role <email> <student|support|admin>` (única forma de crear el primer administrador).
+
 Server actions (formularios): `toggleGamification`, `createSubject`, `updateSubject`, `deleteSubject`, `togglePlanItem`, `rebuildPlan` — todas con `requireUser()` y filtro por propietario.
 
 Límites: 40 operaciones de IA/día en plan gratuito (`AI_DAILY_LIMIT_FREE`), 429 al superarlo. Las operaciones fallidas no cuentan.

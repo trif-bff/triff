@@ -21,6 +21,13 @@ La primera migración ejecuta `CREATE EXTENSION IF NOT EXISTS vector` (el rol ne
 4. Activar IA: `AI_PROVIDER` + clave; embeddings opcionales con `EMBEDDINGS_PROVIDER`.
 5. **OCR**: requiere los binarios `tesseract` (con `spa`/`cat`) y `pdftoppm`, incluidos en el `Dockerfile`. En plataformas sin ellos (p. ej. Vercel serverless) el OCR se desactiva automáticamente y se informa al usuario; para tenerlo allí, mover la ingesta a un worker con la imagen Docker (previsto con la cola pg-boss).
 
+## Primer administrador
+Tras desplegar y registrarte en la web, en el servidor:
+```bash
+pnpm admin:role tu-correo@ejemplo.com admin
+```
+(`admin:role` lee `.env.local`; en otros entornos ejecuta `pnpm exec tsx scripts/admin-role.mts <email> admin` con `DATABASE_URL` definida.)
+
 ## CI
 `.github/workflows/ci.yml`: lint → typecheck → migraciones → unit/integración → build → E2E (Postgres pgvector como servicio).
 

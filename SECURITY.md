@@ -16,7 +16,10 @@
 | Fuga de respuestas | Las respuestas correctas solo se envían tras entregar | `quiz/[id]/page.tsx` | E2E |
 | Secretos | Solo variables de entorno; hook que bloquea escribir claves; `.env*` ignorados | `.claude/hooks` | Hook probado |
 | Coste / abuso de IA | Cuota diaria, registro por operación, fallos no facturables | `usage.ts` | Integración (sin IA no se registra consumo) |
-| Auditoría | `audit_log` (ingesta) | | — |
+| Auditoría | `audit_log`: ingesta y todas las acciones de administración, con actor y valores antes/después | `services/admin.ts`, `services/settings.ts` | Integración + E2E |
+| Escalada de privilegios | Roles `student`/`support`/`admin` con permisos explícitos; el primer admin solo por CLI; sin auto-promoción, auto-degradación ni auto-suspensión; siempre ≥ 1 admin activo; permisos comprobados en acción y servicio; `/admin` responde 404 a no staff | `lib/admin/permissions.ts`, `services/admin.ts` | Unit + integración + E2E |
+| Cuentas suspendidas | Se borran sus sesiones, `getUser` las rechaza aunque tengan cookie, y un hook de Better Auth impide crear sesiones nuevas | `auth/server.ts`, `auth/session.ts` | Integración + E2E |
+| Privacidad en el panel | Solo agregados y metadatos; nunca contenido de apuntes, conversaciones o respuestas. Las claves de API nunca se muestran (solo «configurada / sin clave») | `services/admin.ts` | Revisión + E2E |
 
 ## Pendiente antes de producción
 - Proveedor de email para verificación y recuperación de contraseña (hoy el enlace solo se registra en desarrollo).

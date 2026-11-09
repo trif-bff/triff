@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { Logo } from "@/components/logo";
+import { Shield } from "lucide-react";
 import { Nav, SignOut, ThemeToggle } from "@/components/nav";
+import { isStaff } from "@/lib/admin/permissions";
 import { requireUser } from "@/lib/auth/session";
 import { dueCards } from "@/lib/services/progress";
 
@@ -17,6 +19,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             <p className="truncate text-sm font-medium">{user.name}</p>
             <p className="truncate text-xs text-ink-3">{user.email}</p>
           </div>
+          {isStaff(user.role) && (
+            <Link href="/admin" className="rounded-xl p-2 text-ink-2 hover:bg-surface-2" aria-label="Panel de administración" title="Administración">
+              <Shield className="h-4.5 w-4.5" />
+            </Link>
+          )}
           <ThemeToggle />
           <SignOut />
         </div>

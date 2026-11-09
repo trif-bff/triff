@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.5.0] — 2026-11-09 — Panel de administración (Fase 15)
+### Añadido
+- Panel `/admin` con roles: **admin** (todo) y **support** (solo lectura). Para cualquier otro usuario responde 404.
+- El primer administrador solo se crea desde la línea de comandos (`pnpm admin:role <email> admin`); en la web nadie puede elevar su propio rol.
+- **Resumen**: usuarios, altas, activos, documentos (OCR/fallidos), operaciones y coste de IA, estado del sistema (IA, OCR, embeddings).
+- **Usuarios**: búsqueda y paginación; cambio de rol y de plan; **suspensión** que revoca todas las sesiones al instante e impide nuevos inicios de sesión. Protecciones: nadie puede degradarse ni suspenderse a sí mismo y siempre queda al menos un administrador activo.
+- **Consumo de IA** (7/30/90 días): operaciones por día, por modelo y por función, usuarios con más consumo facturable y **coste estimado** con precios configurables (aviso de modelos sin precio).
+- **Configuración** en base de datos (sin secretos): límite diario de IA por plan (gratuito/premium), proveedor y modelos de tutor y generación, y tabla de precios. Validada con Zod, efectiva en ≤ 30 s y auditada con el valor anterior y el nuevo.
+- **Errores y auditoría**: documentos fallidos (nombre y error, nunca contenido), OCR de baja confianza, fallos de IA y registro de todas las acciones de administración.
+- Plan de usuario (`free`/`premium`) aplicado a los límites de IA (preparado para Stripe).
+### Seguridad y privacidad
+- Permisos comprobados en la acción **y** en el servicio (defensa en profundidad).
+- El panel no muestra apuntes, conversaciones ni respuestas de los estudiantes.
+- Mensaje en español para cuentas suspendidas.
+
 ## [0.4.0] — 2026-11-09 — Gamificación (Fase 10)
 ### Añadido
 - **XP** por actividad real (repasos que tocaban, preguntas respondidas y acertadas, apuntes, simulacros) con **tope diario de 150 XP** para que no compense «farmear».

@@ -229,5 +229,6 @@ describe("auth messages", async () => {
     expect(authErrorMessage({ status: 429, message: "Too many requests. Please try again later." })).toMatch(/Demasiados intentos/);
     expect(authErrorMessage({ code: "USER_ALREADY_EXISTS", status: 422 })).toMatch(/Ya existe una cuenta/);
     expect(authErrorMessage({ code: "SOMETHING_NEW", status: 400, message: "English text" })).not.toMatch(/English/);
+    expect(authErrorMessage({ code: "FAILED_TO_CREATE_SESSION", status: 401 })).toMatch(/suspendida/);
   });
 });

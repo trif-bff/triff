@@ -2,11 +2,13 @@ import "server-only";
 import { and, count, eq, gte } from "drizzle-orm";
 import { db } from "@/db";
 import { aiUsage } from "@/db/schema";
+import { getSettings } from "./settings";
 
-/** Daily AI-operation allowance per plan. Configurable; premium plans arrive with Stripe (Phase 14). */
-export function dailyLimit(role: string) {
-  if (role === "admin") return Number.POSITIVE_INFINITY;
-  return Number(process.env.AI_DAILY_LIMIT_FREE ?? 40);
+/** Daily AI-operation allowance per plan, configurable from the admin panel. */
+export async function dailyLimit(user: { role: string; plan?: string }) {
+  if (user.role === "admin") return Number.POSITIVE_INFINITY;
+  const s = await getSettings();
+  return user.plan === "premium" ? s.plans.premium.aiDailyLimit : s.plans.free.aiDailyLimit;
 }
 
 function startOfDay() {
@@ -23,9 +25,9 @@ export async function usedToday(userId: string) {
   return r?.n ?? 0;
 }
 
-export async function assertQuota(user: { id: string; role: string }) {
+export async function assertQuota(user: { id: string; role: string; plan?: string }) {
   const used = await usedToday(user.id);
-  const limit = dailyLimit(user.role);
+  const limit = await dailyLimit(user);
   if (used >= limit) {
     const e = new Error(`Has alcanzado el límite diario de ${limit} operaciones de IA.`);
     (e as Error & { status?: number }).status = 429;

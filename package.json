@@ -12,7 +12,8 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test --trace off",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "tsx scripts/migrate.mts"
+    "db:migrate": "tsx scripts/migrate.mts",
+    "admin:role": "tsx --env-file=.env.local scripts/admin-role.mts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.99",

@@ -6,6 +6,8 @@ const MESSAGES: Record<string, string> = {
   INVALID_EMAIL: "El correo no es válido.",
   PASSWORD_TOO_SHORT: "La contraseña debe tener al menos 10 caracteres.",
   PASSWORD_TOO_LONG: "La contraseña es demasiado larga.",
+  // Returned when the session hook refuses a suspended account.
+  FAILED_TO_CREATE_SESSION: "No se ha podido iniciar sesión. Si tu cuenta está suspendida, escribe a soporte.",
 };
 
 export function authErrorMessage(err: { code?: string; status?: number; message?: string } | null | undefined) {

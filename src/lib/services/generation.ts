@@ -16,9 +16,10 @@ import {
 } from "@/lib/learning/heuristic";
 import { newCardState } from "@/lib/learning/srs";
 import { topicIndex } from "./documents";
+import { getSettings } from "./settings";
 import { assertQuota, logUsage } from "./usage";
 
-type User = { id: string; role: string };
+type User = { id: string; role: string; plan?: string };
 
 export async function loadChunks(userId: string, subjectId: string, topicId?: string | null) {
   const rows = await db
@@ -83,7 +84,7 @@ function selectSources(rows: Awaited<ReturnType<typeof loadChunks>>, maxChars = 
 
 async function withAi<T>(user: User, feature: string, fn: (m: ReturnType<typeof getModel>) => Promise<{ value: T; usage?: { inputTokens?: number; outputTokens?: number } }>) {
   await assertQuota(user);
-  const m = getModel("generation");
+  const m = getModel("generation", (await getSettings()).ai);
   try {
     const { value, usage } = await fn(m);
     await logUsage({ userId: user.id, feature, provider: m.provider, model: m.modelId, inputTokens: usage?.inputTokens ?? 0, outputTokens: usage?.outputTokens ?? 0, success: true });
@@ -103,7 +104,7 @@ export async function generateFlashcards(user: User, subjectId: string, opts: { 
   let origin: "ai" | "heuristic" = "heuristic";
   let fallbackNote: string | undefined;
 
-  if (isAiEnabled()) {
+  if (isAiEnabled((await getSettings()).ai)) {
     try {
       const { picked, sources } = selectSources(rows);
       cards = await withAi(user, "flashcards", async ({ model }) => {
@@ -154,7 +155,7 @@ export async function generateQuiz(user: User, subjectId: string, opts: { topicI
 
   let qs: GeneratedQuestion[] = [];
   let origin: "ai" | "heuristic" = "heuristic";
-  if (isAiEnabled()) {
+  if (isAiEnabled((await getSettings()).ai)) {
     try {
       const { picked, sources } = selectSources(rows);
       qs = await withAi(user, "quiz", async ({ model }) => {

@@ -4,7 +4,7 @@ PostgreSQL 16 + pgvector. Fuente de verdad: `src/db/schema.ts`; migraciones en `
 
 | Tabla | Propósito | Claves / índices |
 |---|---|---|
-| `user`, `session`, `account`, `verification` | Better Auth. `user.role` (`student`/`admin`) | `email` único, `session.token` único |
+| `user`, `session`, `account`, `verification` | Better Auth. `user.role` (`student`/`support`/`admin`), `plan` (`free`/`premium`), `banned`, `banned_reason` | `email` único, `session.token` único |
 | `subjects` | Asignatura/examen: nivel, `exam_date`, `target_grade`, `minutes_per_day`, `sources_only` | idx `user_id` |
 | `documents` | Archivo subido: tipo, tamaño, `sha256`, `status` (pending/processing/ready/failed), páginas, `injection_flags`, `ocr_pages`, `ocr_confidence` (0–100), error | único (`subject_id`,`sha256`) |
 | `chunks` | Fragmento indexado: página, encabezado, contenido, `suspicious`, `tsv` (**generado**, `to_tsvector('spanish')`), `embedding vector(1536)` | GIN(`tsv`), HNSW(`embedding vector_cosine_ops`) |
@@ -21,7 +21,8 @@ PostgreSQL 16 + pgvector. Fuente de verdad: `src/db/schema.ts`; migraciones en `
 | `daily_challenges` | Retos del día: tipo, objetivo, tema, completado | único (`user_id`,`day`,`slot`) |
 | `user_settings` | Preferencias (p. ej. `gamification` on/off) | PK `user_id` |
 | `ai_usage` | Consumo por operación: proveedor, modelo, tokens, `success`, `billable` (= success) | idx (`user_id`,`created_at`) |
-| `audit_log` | Eventos relevantes (ingesta, futuras acciones de admin) | |
+| `audit_log` | Eventos relevantes: ingesta y todas las acciones de administración (actor, acción, objetivo, metadatos con valores antes/después) | idx (`created_at`), (`action`) |
+| `app_settings` | Configuración editable desde el panel (límites por plan, modelos, precios). **Nunca secretos** | PK `key` |
 
 Borrado: todas las tablas de usuario cuelgan de `user` con `ON DELETE CASCADE` (derecho de supresión RGPD).
 

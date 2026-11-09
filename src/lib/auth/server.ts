@@ -2,6 +2,7 @@ import "server-only";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
 import { nextCookies } from "better-auth/next-js";
+import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
 
@@ -23,6 +24,8 @@ export const auth = betterAuth({
   user: {
     additionalFields: {
       role: { type: "string", defaultValue: "student", input: false },
+      plan: { type: "string", defaultValue: "free", input: false },
+      banned: { type: "boolean", defaultValue: false, input: false },
     },
   },
   session: { expiresIn: 60 * 60 * 24 * 14, updateAge: 60 * 60 * 24 },
@@ -30,5 +33,16 @@ export const auth = betterAuth({
   // which registers many accounts from one IP; never set it in production.
   rateLimit: { enabled: process.env.AUTH_RATE_LIMIT !== "off", window: 60, max: 30, storage: "memory" },
   advanced: { useSecureCookies: process.env.NODE_ENV === "production" },
+  databaseHooks: {
+    session: {
+      create: {
+        // Suspended users cannot start new sessions.
+        before: async (session) => {
+          const [u] = await db.select({ banned: schema.user.banned }).from(schema.user).where(eq(schema.user.id, session.userId));
+          if (u?.banned) return false;
+        },
+      },
+    },
+  },
   plugins: [nextCookies()],
 });

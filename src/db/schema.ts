@@ -26,7 +26,10 @@ export const user = pgTable("user", {
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified").notNull().default(false),
   image: text("image"),
-  role: text("role").notNull().default("student"),
+  role: text("role").notNull().default("student"), // student | support | admin
+  plan: text("plan").notNull().default("free"), // free | premium (Stripe arrives in Phase 14)
+  banned: boolean("banned").notNull().default(false),
+  bannedReason: text("banned_reason"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
@@ -404,14 +407,18 @@ export const aiUsage = pgTable(
   (t) => [index("ai_usage_user_time_idx").on(t.userId, t.createdAt)],
 );
 
-export const auditLog = pgTable("audit_log", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  userId: text("user_id"),
-  action: text("action").notNull(),
-  target: text("target"),
-  meta: jsonb("meta").$type<Record<string, unknown>>().notNull().default({}),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
+export const auditLog = pgTable(
+  "audit_log",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id"),
+    action: text("action").notNull(),
+    target: text("target"),
+    meta: jsonb("meta").$type<Record<string, unknown>>().notNull().default({}),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("audit_log_time_idx").on(t.createdAt), index("audit_log_action_idx").on(t.action)],
+);
 
 /* ------------------------------------------------------------------ */
 /* Gamification                                                        */
@@ -469,5 +476,17 @@ export const userSettings = pgTable("user_settings", {
     .primaryKey()
     .references(() => user.id, { onDelete: "cascade" }),
   gamification: boolean("gamification").notNull().default(true),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+/* ------------------------------------------------------------------ */
+/* Administration                                                      */
+/* ------------------------------------------------------------------ */
+
+/** Runtime configuration editable from the admin panel (limits, models, prices). Never secrets. */
+export const appSettings = pgTable("app_settings", {
+  key: text("key").primaryKey(),
+  value: jsonb("value").$type<unknown>().notNull(),
+  updatedBy: text("updated_by"),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });

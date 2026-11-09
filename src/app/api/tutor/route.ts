@@ -8,6 +8,7 @@ import { buildSystemPrompt, formatSources, TUTOR_MODES } from "@/lib/ai/prompts"
 import { guard, isResponse, jsonError } from "@/lib/http";
 import { retrieve, type Retrieved } from "@/lib/rag/retrieve";
 import { getOwnedSubject } from "@/lib/services/documents";
+import { getSettings } from "@/lib/services/settings";
 import { assertQuota, logUsage } from "@/lib/services/usage";
 
 export const maxDuration = 120;
@@ -65,7 +66,8 @@ export async function POST(req: Request) {
     "Cache-Control": "no-store",
   };
 
-  if (!isAiEnabled()) {
+  const aiOverrides = (await getSettings()).ai;
+  if (!isAiEnabled(aiOverrides)) {
     const text = offlineAnswer(sources, Boolean(subject));
     await db.insert(messages).values({ conversationId, role: "assistant", content: text, citations });
     return new Response(text, { headers });
@@ -77,7 +79,7 @@ export async function POST(req: Request) {
     return jsonError((e as Error).message, 429);
   }
 
-  const { model, provider, modelId } = getModel("tutor");
+  const { model, provider, modelId } = getModel("tutor", aiOverrides);
   const system = buildSystemPrompt({ mode: input.mode, level: subject?.level, subject: subject?.name, sourcesOnly: subject?.sourcesOnly ?? false, style: input.style });
   const img = input.image?.match(IMAGE_RE);
   const userContent: ModelMessage["content"] = [

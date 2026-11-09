@@ -123,6 +123,6 @@ Infraestructura MVP: un Postgres gestionado (~$25–50/mes) + hosting Next.js. V
 | 13 Simulacros | ✅ examen escrito cronometrado (v0.2, sin IA: ABCD y V/F) · ⏳ preguntas abiertas con rúbrica (requiere IA), examen oral |
 | 15 Voz y podcasts | ⏳ |
 | 16 Gamificación | ✅ v0.4: XP con tope diario e idempotente, niveles, racha con descanso, retos diarios, insignias, página Logros, opción de ocultar |
-| 17 Monetización (Stripe) | ⏳ cuotas ya aplicadas |
-| 18 Admin | ⏳ (rol `admin` y `audit_log` ya en el esquema) |
+| 17 Monetización (Stripe) | ⏳ planes free/premium y cuotas por plan ya aplicados; falta el cobro con Stripe |
+| 18 Admin | ✅ v0.5: roles admin/support, usuarios (rol, plan, suspensión), consumo y coste de IA, configuración en BD, errores y auditoría |
 | 19–21 Testing, optimización, despliegue | 🟡 tests en CI; despliegue pendiente de autorización |
