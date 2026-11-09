@@ -26,7 +26,9 @@ Una funcionalidad de IA no está terminada porque "responda": debe medirse. Este
 
 | Panel de administración | RBAC, protecciones (auto-degradación, último admin), suspensión con revocación de sesiones, límites por plan, coste estimado, auditoría | `tests/unit/admin.test.ts`, `tests/integration/admin.test.ts`, `tests/e2e/admin.spec.ts` |
 
-Resultado actual: **101 tests de Vitest + 15 E2E de Playwright en verde** (más 1 E2E solo móvil omitido en escritorio).
+| Email | Escapado y enlaces seguros en plantillas, cliente de Resend (éxito, error de API, caída de red), selección de proveedor, recuperación con revocación de sesiones y enlace de un solo uso, sin enumeración, verificación | `tests/unit/email.test.ts`, `tests/integration/email.test.ts`, `tests/e2e/email.spec.ts` |
+
+Resultado actual: **111 tests de Vitest + 18 E2E de Playwright en verde** (más 1 E2E solo móvil omitido en escritorio).
 
 ## 2. Pendiente de medir con proveedor de IA (requiere tu autorización por coste)
 Conjunto propuesto de evaluación (`evals/`, a crear):

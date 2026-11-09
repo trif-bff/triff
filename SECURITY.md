@@ -21,8 +21,11 @@
 | Cuentas suspendidas | Se borran sus sesiones, `getUser` las rechaza aunque tengan cookie, y un hook de Better Auth impide crear sesiones nuevas | `auth/server.ts`, `auth/session.ts` | Integración + E2E |
 | Privacidad en el panel | Solo agregados y metadatos; nunca contenido de apuntes, conversaciones o respuestas. Las claves de API nunca se muestran (solo «configurada / sin clave») | `services/admin.ts` | Revisión + E2E |
 
+| Recuperación de cuenta | Enlace de un solo uso (30 min), revocación de todas las sesiones al cambiar la contraseña, aviso por correo, sin enumeración de cuentas (respuesta idéntica y envío sin esperar), 3 solicitudes/15 min por IP | `auth/server.ts`, `email/*` | Integración + E2E |
+| Correos | Plantillas con escapado y solo enlaces http(s); en producción no se almacena el contenido; la bandeja local está prohibida en producción salvo en el servidor de E2E (`ALLOW_TEST_OUTBOX=1`) | `email/templates.ts`, `email/send.ts` | Unit + integración |
+
 ## Pendiente antes de producción
-- Proveedor de email para verificación y recuperación de contraseña (hoy el enlace solo se registra en desarrollo).
+- Configurar Resend con un dominio propio verificado (SPF, DKIM y DMARC) para que los correos no acaben en spam.
 - Rate limiting distribuido (Redis) si hay más de una instancia.
 - CSP estricta con nonces.
 - Almacenamiento de originales (S3 compatible) cifrado en reposo con URLs firmadas, si se decide conservarlos.

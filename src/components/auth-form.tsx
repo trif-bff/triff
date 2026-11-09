@@ -22,7 +22,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     const password = String(f.get("password"));
     const res =
       mode === "register"
-        ? await authClient.signUp.email({ email, password, name: String(f.get("name")) })
+        ? await authClient.signUp.email({ email, password, name: String(f.get("name")), callbackURL: "/dashboard?verified=1" })
         : await authClient.signIn.email({ email, password });
     setPending(false);
     if (res.error) {
@@ -38,6 +38,9 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     <Card className="p-6">
       <h1 className="font-display mb-1 text-2xl font-semibold">{mode === "login" ? "Hola de nuevo" : "Crea tu cuenta"}</h1>
       <p className="mb-6 text-sm text-ink-3">{mode === "login" ? "Continúa donde lo dejaste." : "Tu plan de estudio empieza aquí."}</p>
+      {mode === "login" && params.get("reset") === "1" && (
+        <p role="status" className="mb-4 rounded-lg bg-success/10 px-3 py-2 text-sm text-success">Contraseña cambiada. Ya puedes entrar con la nueva.</p>
+      )}
       <form onSubmit={onSubmit} className="space-y-4" noValidate={false}>
         {mode === "register" && (
           <div>
@@ -53,6 +56,9 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
           <Label htmlFor="password">Contraseña</Label>
           <Input id="password" name="password" type="password" required minLength={10} autoComplete={mode === "login" ? "current-password" : "new-password"} />
           {mode === "register" && <p className="mt-1 text-xs text-ink-3">Mínimo 10 caracteres.</p>}
+          {mode === "login" && (
+            <p className="mt-1.5 text-right text-xs"><Link className="text-primary hover:underline" href="/forgot-password">¿Has olvidado tu contraseña?</Link></p>
+          )}
         </div>
         {error && <p role="alert" className="rounded-lg bg-danger-soft px-3 py-2 text-sm text-danger">{error}</p>}
         <Button type="submit" className="w-full" disabled={pending}>

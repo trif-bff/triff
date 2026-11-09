@@ -49,6 +49,19 @@ export default async function ErrorsPage() {
       </section>
 
       <section>
+        <SectionTitle>Correos que no se pudieron enviar (30 días)</SectionTitle>
+        {e.failedEmails.length === 0 ? (
+          <Empty title="Sin fallos de envío" />
+        ) : (
+          <Card className="p-0">
+            <ul className="divide-y divide-border text-sm">
+              {e.failedEmails.map((m) => <li key={m.id} className="flex flex-wrap justify-between gap-2 px-4 py-2.5"><span>{m.kind} → {m.to}</span><span className="text-danger">{m.error}</span><span className="tabular-nums text-ink-3">{fmt(m.created_at)}</span></li>)}
+            </ul>
+          </Card>
+        )}
+      </section>
+
+      <section>
         <SectionTitle>Operaciones de IA fallidas (30 días)</SectionTitle>
         {e.failedAi.length === 0 ? (
           <Empty title="Sin fallos de IA" />

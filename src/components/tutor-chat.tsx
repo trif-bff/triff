@@ -181,7 +181,7 @@ export function TutorChat(props: { subjects: { id: string; name: string }[]; ini
             aria-label="Mensaje para la tutora"
             className="max-h-48 min-h-11 flex-1 resize-none bg-transparent px-2 py-2.5 text-base focus:outline-none"
           />
-          <button type="submit" disabled={busy || !input.trim()} className="grid h-10 w-10 place-items-center rounded-xl bg-primary text-primary-ink disabled:opacity-40" aria-label="Enviar">
+          <button type="submit" disabled={busy || !input.trim()} className="grid h-10 w-10 place-items-center rounded-xl bg-primary text-primary-ink disabled:opacity-40" aria-label="Enviar mensaje">
             {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowUp className="h-4 w-4" />}
           </button>
         </div>

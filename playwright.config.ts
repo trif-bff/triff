@@ -23,6 +23,8 @@ export default defineConfig({
       BETTER_AUTH_SECRET: "e2e-secret-0123456789abcdef0123456789",
       ANTHROPIC_API_KEY: "",
       AUTH_RATE_LIMIT: "off", // many sign-ups from one IP during the suite
+      EMAIL_PROVIDER: "outbox", // emails stored in email_log so tests can follow the links
+      ALLOW_TEST_OUTBOX: "1", // `next start` runs in production mode; allow the outbox ONLY here
     },
   },
 });

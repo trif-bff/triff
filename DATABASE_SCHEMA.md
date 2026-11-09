@@ -22,6 +22,7 @@ PostgreSQL 16 + pgvector. Fuente de verdad: `src/db/schema.ts`; migraciones en `
 | `user_settings` | Preferencias (p. ej. `gamification` on/off) | PK `user_id` |
 | `ai_usage` | Consumo por operación: proveedor, modelo, tokens, `success`, `billable` (= success) | idx (`user_id`,`created_at`) |
 | `audit_log` | Eventos relevantes: ingesta y todas las acciones de administración (actor, acción, objetivo, metadatos con valores antes/después) | idx (`created_at`), (`action`) |
+| `email_log` | Correos transaccionales: destinatario, tipo, proveedor, estado (`sent`/`stored`/`failed`), error. El cuerpo solo se guarda con la bandeja local de desarrollo | idx (`created_at`), (`to`) |
 | `app_settings` | Configuración editable desde el panel (límites por plan, modelos, precios). **Nunca secretos** | PK `key` |
 
 Borrado: todas las tablas de usuario cuelgan de `user` con `ON DELETE CASCADE` (derecho de supresión RGPD).

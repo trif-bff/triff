@@ -4,7 +4,7 @@ Todas las rutas requieren sesión (cookie de Better Auth). Las mutaciones valida
 
 | Método y ruta | Cuerpo | Respuesta |
 |---|---|---|
-| `GET/POST /api/auth/*` | Endpoints estándar de Better Auth (registro, inicio y cierre de sesión, recuperación de contraseña) | Sesión |
+| `GET/POST /api/auth/*` | Endpoints de Better Auth: registro, inicio y cierre de sesión, `request-password-reset` (3/15 min por IP), `reset-password`, `send-verification-email` (3/15 min por IP), `verify-email` | Sesión |
 | `POST /api/subjects/:id/documents` | `multipart/form-data` con `file` (PDF —también escaneado—, DOCX, TXT, MD, PNG, JPG, WEBP ≤ 15 MB; imágenes ≤ 40 MP) | `201 { id, chunks, injectionFlags, pageCount, ocr: null \| { pages, confidence, skippedPages, lowConfidence } }` · 409 duplicado · 413 tamaño · 415 formato · 422 sin texto legible. Hasta 300 s con OCR |
 | `POST /api/subjects/:id/flashcards` | `{ topicId?: uuid, count?: 1–40 }` | `{ created, origin: "ai"|"heuristic"|"none", message? }` |
 | `POST /api/subjects/:id/quizzes` | `{ topicId?: uuid, count?: 3–30 }` | `{ quizId, origin, message? }` |

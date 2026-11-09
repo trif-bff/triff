@@ -490,3 +490,25 @@ export const appSettings = pgTable("app_settings", {
   updatedBy: text("updated_by"),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+/**
+ * Transactional email log. In production only metadata is kept (emails carry
+ * one-time sign-in links); the body is stored only by the local "outbox"
+ * provider used in development and tests.
+ */
+export const emailLog = pgTable(
+  "email_log",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    to: text("to").notNull(),
+    kind: text("kind").notNull(), // reset_password | verify_email | password_changed
+    provider: text("provider").notNull(), // resend | outbox | none
+    status: text("status").notNull(), // sent | stored | failed
+    providerId: text("provider_id"),
+    error: text("error"),
+    subject: text("subject").notNull(),
+    body: text("body"), // outbox only
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("email_log_time_idx").on(t.createdAt), index("email_log_to_idx").on(t.to)],
+);

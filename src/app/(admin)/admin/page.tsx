@@ -48,6 +48,7 @@ export default async function AdminHome() {
           <Status ok={sys.aiEnabled} label={`IA (${sys.activeProvider})`} detail={sys.aiEnabled ? `tutor: ${sys.models.tutor} · generación: ${sys.models.generation}` : "sin clave del proveedor: funciona en modo sin IA"} />
           <Status ok={sys.ocr} label="OCR local" detail={sys.ocr ? "Tesseract y pdftoppm disponibles" : "no disponible en este servidor"} />
           <Status ok={sys.embeddings !== "none"} label="Embeddings" detail={sys.embeddings === "none" ? "solo búsqueda de texto completo" : sys.embeddings} warn />
+          <Status ok={sys.email === "resend"} label="Email" detail={sys.email === "resend" ? "Resend configurado" : sys.email === "outbox" ? "bandeja local (desarrollo): no se envían correos reales" : "sin proveedor: la recuperación de contraseña no funcionará"} warn={sys.email === "outbox"} />
           <Status ok={o.docs_failed === 0} label="Documentos fallidos" detail={o.docs_failed ? <Link className="text-primary hover:underline" href="/admin/errors">{o.docs_failed} por revisar</Link> : "ninguno"} warn />
         </Card>
       </section>

@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.6.0] — 2026-11-09 — Email: recuperación de contraseña y verificación
+### Añadido
+- **Recuperar contraseña**: «¿Has olvidado tu contraseña?» → enlace por correo (30 min, un solo uso) → contraseña nueva. Al cambiarla se **cierran todas las sesiones** y se envía un aviso «Tu contraseña ha cambiado».
+- **Verificación de correo** al registrarse, no bloqueante: aviso en la app con botón «Reenviar el enlace» y confirmación al volver.
+- Envío con **Resend** (`RESEND_API_KEY`, `EMAIL_FROM`) o **bandeja local** en desarrollo (`email_log`). En producción sin proveedor, los envíos se registran como fallidos y el panel de administración lo avisa.
+- Plantillas en español, HTML + texto, sin píxeles de seguimiento ni imágenes externas; nombres escapados.
+- Panel de administración: estado del email y correos fallidos.
+### Seguridad
+- No se revela si un correo tiene cuenta (misma respuesta y envío sin esperar para no filtrar por tiempo).
+- Límite de 3 solicitudes de recuperación/verificación por IP cada 15 minutos.
+- En producción no se guarda el contenido de los correos (llevan enlaces de acceso); solo metadatos.
+- Un enlace mal formado (p. ej. `BETTER_AUTH_URL` mal configurada) queda registrado como fallo en lugar de perderse.
+
 ## [0.5.0] — 2026-11-09 — Panel de administración (Fase 15)
 ### Añadido
 - Panel `/admin` con roles: **admin** (todo) y **support** (solo lectura). Para cualquier otro usuario responde 404.

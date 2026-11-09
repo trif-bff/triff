@@ -5,6 +5,7 @@ import { auditLog, session, user } from "@/db/schema";
 import { estimateCost } from "@/lib/admin/costs";
 import { can, checkUserChange, ForbiddenError, type Permission, type Plan, type Role } from "@/lib/admin/permissions";
 import { aiConfig, providerStatus } from "@/lib/ai/provider";
+import { emailProvider } from "@/lib/email/send";
 import { getSettings } from "./settings";
 
 /**
@@ -161,7 +162,10 @@ export async function errorsReport(actor: Actor) {
   const failedAi = await db.execute<{ feature: string; model: string; n: number; last: Date }>(sql`
     select feature, model, count(*)::int as n, max(created_at) as last
     from ai_usage where not success and created_at > now() - interval '30 days' group by 1, 2 order by n desc limit 20`);
-  return { failedDocs: failedDocs.rows, lowOcr: lowOcr.rows[0]?.n ?? 0, failedAi: failedAi.rows };
+  const failedEmails = await db.execute<{ id: string; to: string; kind: string; error: string | null; created_at: Date }>(sql`
+    select id, "to", kind, error, created_at from email_log
+    where status = 'failed' and created_at > now() - interval '30 days' order by created_at desc limit 30`);
+  return { failedDocs: failedDocs.rows, lowOcr: lowOcr.rows[0]?.n ?? 0, failedAi: failedAi.rows, failedEmails: failedEmails.rows };
 }
 
 export async function auditTrail(actor: Actor, opts: { limit?: number; onlyAdmin?: boolean } = {}) {
@@ -190,6 +194,7 @@ export async function systemStatus(actor: Actor) {
     models: cfg.models,
     embeddings: process.env.EMBEDDINGS_PROVIDER ?? "none",
     ocr: process.env.OCR_ENABLED === "false" ? false : await ocrAvailable(),
+    email: emailProvider(),
     settings,
   };
 }

@@ -12,6 +12,6 @@ export default defineConfig({
     include: ["tests/unit/**/*.test.ts", "tests/integration/**/*.test.ts"],
     environment: "node",
     fileParallelism: false,
-    env: { DATABASE_URL: process.env.TEST_DATABASE_URL ?? "postgres://triff:triff@localhost:5432/triff_test" },
+    env: { DATABASE_URL: process.env.TEST_DATABASE_URL ?? "postgres://triff:triff@localhost:5432/triff_test", BETTER_AUTH_URL: "http://localhost:3000" },
   },
 });

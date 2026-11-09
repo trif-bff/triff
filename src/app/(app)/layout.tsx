@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Logo } from "@/components/logo";
 import { Shield } from "lucide-react";
 import { Nav, SignOut, ThemeToggle } from "@/components/nav";
+import { VerifyBanner } from "@/components/verify-banner";
 import { isStaff } from "@/lib/admin/permissions";
 import { requireUser } from "@/lib/auth/session";
 import { dueCards } from "@/lib/services/progress";
@@ -28,7 +29,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           <SignOut />
         </div>
       </aside>
-      <main id="main" className="mx-auto w-full max-w-5xl px-4 pt-6 pb-24 sm:px-8 sm:pt-10 md:pb-10">{children}</main>
+      <main id="main" className="mx-auto w-full max-w-5xl px-4 pt-6 pb-24 sm:px-8 sm:pt-10 md:pb-10">
+        {!user.emailVerified && <VerifyBanner email={user.email} />}
+        {children}
+      </main>
     </div>
   );
 }

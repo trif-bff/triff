@@ -116,7 +116,7 @@ Infraestructura MVP: un Postgres gestionado (~$25–50/mes) + hosting Next.js. V
 |---|---|
 | 0–1 Auditoría, investigación, skills, agentes, MCP | ✅ (instalación de plugins del catálogo pendiente de tu confirmación) |
 | 2–3 Arquitectura y diseño visual | ✅ sistema de diseño propio, claro/oscuro, responsive |
-| 4–8 BD, auth, dashboard, documentos, tutor | ✅ MVP + OCR (v0.3) (falta: recuperación de contraseña por email real) |
+| 4–8 BD, auth, dashboard, documentos, tutor | ✅ MVP + OCR (v0.3) + email: recuperación de contraseña y verificación (v0.6) |
 | 9 Exam Prep (plan) | ✅ plan adaptativo; falta estimación por horas totales y exámenes anteriores |
 | 10 Herramientas | ✅ flashcards FSRS, ABCD, V/F · ⏳ Smart Text, ejercicios con rúbrica, podcasts |
 | 12 Motor adaptativo | ✅ v1 (dominio + decisiones + lagunas) · ⏳ grafo de prerrequisitos |

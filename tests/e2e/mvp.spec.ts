@@ -73,7 +73,7 @@ test.describe.serial("MVP acceptance flow", () => {
     await page.goto("/tutor?mode=solver");
     await expect(page.getByRole("tab", { name: "Resolver paso a paso" })).toHaveAttribute("aria-selected", "true");
     await page.getByLabel("Mensaje para la tutora").fill("¿Qué es la partida doble?");
-    await page.getByRole("button", { name: "Enviar" }).click();
+    await page.getByRole("button", { name: "Enviar mensaje" }).click();
     await expect(page.getByText("Fuentes de tus apuntes")).toBeVisible({ timeout: 20_000 });
     await expect(page.getByText(/\[1\] contabilidad\.md/)).toBeVisible();
 
@@ -114,7 +114,7 @@ test.describe.serial("MVP acceptance flow", () => {
     await page.goto("/tutor");
     await page.getByLabel("Asignatura").selectOption({ label: "Matemáticas" });
     await page.getByLabel("Mensaje para la tutora").fill("integral");
-    await page.getByRole("button", { name: "Enviar" }).click();
+    await page.getByRole("button", { name: "Enviar mensaje" }).click();
     await expect(page.getByText(/calculo\.pdf, p\. 2/)).toBeVisible({ timeout: 20_000 });
   });
 

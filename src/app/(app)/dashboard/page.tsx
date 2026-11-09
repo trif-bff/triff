@@ -18,7 +18,8 @@ function greeting() {
   return h < 6 ? "Buenas noches" : h < 14 ? "Buenos días" : h < 21 ? "Buenas tardes" : "Buenas noches";
 }
 
-export default async function Dashboard() {
+export default async function Dashboard({ searchParams }: { searchParams: Promise<{ verified?: string }> }) {
+  const { verified } = await searchParams;
   const user = await requireUser();
   const [summaries, plan, streakInfo, minutes, due, game] = await Promise.all([
     subjectSummaries(user.id),
@@ -37,6 +38,7 @@ export default async function Dashboard() {
 
   return (
     <div className="space-y-8">
+      {verified === "1" && <p role="status" className="rounded-xl bg-success/10 px-4 py-2 text-sm text-success">¡Correo confirmado! Gracias.</p>}
       <header className="rise flex flex-wrap items-end justify-between gap-4">
         <div>
         <p className="text-sm text-ink-3">{new Intl.DateTimeFormat("es-ES", { weekday: "long", day: "numeric", month: "long" }).format(new Date())}</p>
