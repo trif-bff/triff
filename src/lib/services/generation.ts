@@ -20,7 +20,7 @@ import { assertQuota, logUsage } from "./usage";
 
 type User = { id: string; role: string };
 
-async function loadChunks(userId: string, subjectId: string, topicId?: string | null) {
+export async function loadChunks(userId: string, subjectId: string, topicId?: string | null) {
   const rows = await db
     .select({
       id: chunks.id,

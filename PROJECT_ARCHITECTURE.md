@@ -118,7 +118,7 @@ Infraestructura MVP: un Postgres gestionado (~$25–50/mes) + hosting Next.js. V
 | 9 Exam Prep (plan) | ✅ plan adaptativo; falta estimación por horas totales y exámenes anteriores |
 | 10 Herramientas | ✅ flashcards FSRS, ABCD, V/F · ⏳ Smart Text, ejercicios con rúbrica, podcasts |
 | 12 Motor adaptativo | ✅ v1 (dominio + decisiones + lagunas) · ⏳ grafo de prerrequisitos |
-| 13 Simulacros | ⏳ examen escrito cronometrado, examen oral |
+| 13 Simulacros | ✅ examen escrito cronometrado (v0.2, sin IA: ABCD y V/F) · ⏳ preguntas abiertas con rúbrica (requiere IA), examen oral |
 | 15 Voz y podcasts | ⏳ |
 | 16 Gamificación | ⏳ (racha ya calculada) |
 | 17 Monetización (Stripe) | ⏳ cuotas ya aplicadas |

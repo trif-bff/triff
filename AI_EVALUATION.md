@@ -15,7 +15,10 @@ Una funcionalidad de IA no está terminada porque "responda": debe medirse. Este
 | Recuperación | Pregunta en lenguaje natural recupera el fragmento correcto (stemming español) y respeta propietario | integración › retrieval |
 | Prompt injection | Documento malicioso marcado como sospechoso; el envoltorio `<source>` no se puede cerrar desde el texto | unit + integración |
 
-Resultado actual: **39 tests de Vitest + 6 E2E de Playwright en verde**.
+| Simulacro: cobertura y pesos | Reparto exacto, proporcional a la importancia, cubre todos los temas con material, nunca supera el material disponible | `tests/unit/mock-exam.test.ts` |
+| Simulacro: validez de la nota | Escala 0–10, sin respuesta ≠ evidencia, comparación con el anterior, retraso con el reloj del servidor | unit + integración + E2E |
+
+Resultado actual: **55 tests de Vitest + 8 E2E de Playwright en verde**.
 
 ## 2. Pendiente de medir con proveedor de IA (requiere tu autorización por coste)
 Conjunto propuesto de evaluación (`evals/`, a crear):

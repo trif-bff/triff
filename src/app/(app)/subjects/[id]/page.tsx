@@ -6,6 +6,8 @@ import { db } from "@/db";
 import { documents, planItems, quizAttempts, quizzes, topics } from "@/db/schema";
 import { rebuildPlan, updateSubject } from "../../actions";
 import { GenerateTools } from "@/components/generate-tools";
+import { MockStarter } from "@/components/mock-starter";
+import { mockHistory } from "@/lib/services/exams";
 import { SubjectForm } from "@/components/subject-form";
 import { Uploader } from "@/components/uploader";
 import { Bar, Card, Empty, MasteryBadge, ProgressRing, SectionTitle, buttonClass } from "@/components/ui";
@@ -23,7 +25,7 @@ export default async function SubjectPage({ params }: { params: Promise<{ id: st
   const subject = await getOwnedSubject(user.id, id);
   if (!subject) notFound();
 
-  const [docs, tm, plan, qz, attempts, due] = await Promise.all([
+  const [docs, tm, plan, qz, attempts, due, mocks] = await Promise.all([
     db.select().from(documents).where(eq(documents.subjectId, id)).orderBy(desc(documents.createdAt)),
     topicMastery(user.id, id),
     db
@@ -33,9 +35,10 @@ export default async function SubjectPage({ params }: { params: Promise<{ id: st
       .where(and(eq(planItems.subjectId, id), gte(planItems.day, todayIso())))
       .orderBy(asc(planItems.day))
       .limit(30),
-    db.select().from(quizzes).where(eq(quizzes.subjectId, id)).orderBy(desc(quizzes.createdAt)).limit(10),
+    db.select().from(quizzes).where(and(eq(quizzes.subjectId, id), eq(quizzes.kind, "practice"))).orderBy(desc(quizzes.createdAt)).limit(10),
     db.select().from(quizAttempts).innerJoin(quizzes, eq(quizzes.id, quizAttempts.quizId)).where(and(eq(quizzes.subjectId, id), eq(quizAttempts.userId, user.id))).orderBy(desc(quizAttempts.createdAt)).limit(20),
     dueCards(user.id, id),
+    mockHistory(user.id, id),
   ]);
   const mastery = overallMastery(tm);
   const byDay = Map.groupBy(plan, (p) => p.day);
@@ -155,6 +158,33 @@ export default async function SubjectPage({ params }: { params: Promise<{ id: st
           )}
         </section>
       </div>
+
+      <section id="mock">
+        <SectionTitle>Simulacro de examen</SectionTitle>
+        <div className="grid gap-4 lg:grid-cols-2">
+          <Card>
+            <MockStarter subjectId={id} />
+          </Card>
+          <Card>
+            <p className="mb-3 font-medium">Tus simulacros</p>
+            {mocks.length === 0 ? (
+              <p className="text-sm text-ink-3">Aún no has hecho ninguno. Hazlo cuando hayas trabajado los temas: mide cómo llegas al examen.</p>
+            ) : (
+              <ul className="space-y-2">
+                {mocks.map((m) => (
+                  <li key={m.id} className="flex items-center justify-between gap-3 text-sm">
+                    <Link href={`/quiz/${m.id}`} className="truncate font-medium text-primary hover:underline">{m.title}</Link>
+                    <span className="shrink-0 tabular-nums text-ink-3">
+                      {m.grade === null ? "en curso" : <span className={m.grade >= 5 ? "font-semibold text-success" : "font-semibold text-danger"}>{m.grade.toFixed(1)}</span>}
+                      {m.late ? " · fuera de tiempo" : ""} · {new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "short" }).format(m.createdAt)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Card>
+        </div>
+      </section>
 
       <details className="card p-5">
         <summary className="cursor-pointer font-semibold">Ajustes del examen</summary>

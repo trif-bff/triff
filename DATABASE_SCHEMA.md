@@ -11,8 +11,8 @@ PostgreSQL 16 + pgvector. Fuente de verdad: `src/db/schema.ts`; migraciones en `
 | `topics` | Temas del mapa de conocimiento: `importance`, `normalized_title`, documento/página de origen | único (`subject_id`,`normalized_title`) |
 | `flashcards` | Tarjeta + estado FSRS (`due`, `stability`, `difficulty`, `reps`, `lapses`, `state`…), `origin` (heuristic/ai/manual), fragmento fuente | idx (`user_id`,`due`), único (`subject_id`,`front`) |
 | `review_logs` | Cada repaso (rating 1–4, duración) | idx (`user_id`,`reviewed_at`) |
-| `quizzes`, `quiz_questions` | Cuestionario y preguntas (`mcq`/`true_false`, opciones, índices correctos, explicación, fuente) | |
-| `quiz_attempts` | Intento: puntuación, duración, respuestas | idx (`user_id`,`created_at`) |
+| `quizzes`, `quiz_questions` | Cuestionario (`kind`: practice/mock, `time_limit_sec`, `started_at` fijado por el servidor) y preguntas (`mcq`/`true_false`, opciones, índices correctos, explicación, fuente) | |
+| `quiz_attempts` | Intento: puntuación, duración, respuestas, `late` (entregado fuera de tiempo) | idx (`user_id`,`created_at`) |
 | `evidence` | **Toda observación de aprendizaje** (kind, score 0–1, duración). El dominio se deriva de aquí | idx (`user_id`,`topic_id`), (`user_id`,`created_at`) |
 | `plan_items` | Plan diario: actividad, minutos, **motivo**, hecho | idx (`user_id`,`day`) |
 | `conversations`, `messages` | Historial del tutor con citas | idx (`conversation_id`,`created_at`) |

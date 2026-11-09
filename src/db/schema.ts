@@ -251,9 +251,12 @@ export const quizzes = pgTable(
       .references(() => subjects.id, { onDelete: "cascade" }),
     title: text("title").notNull(),
     origin: text("origin").notNull().default("heuristic"),
+    kind: text("kind").notNull().default("practice"), // practice | mock
+    timeLimitSec: integer("time_limit_sec"), // mock exams only
+    startedAt: timestamp("started_at", { withTimezone: true }), // set by the server when a mock starts
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [index("quizzes_subject_idx").on(t.subjectId)],
+  (t) => [index("quizzes_subject_idx").on(t.subjectId), index("quizzes_user_kind_idx").on(t.userId, t.kind)],
 );
 
 export const quizQuestions = pgTable("quiz_questions", {
@@ -284,6 +287,7 @@ export const quizAttempts = pgTable(
     score: integer("score").notNull(),
     total: integer("total").notNull(),
     durationMs: integer("duration_ms").notNull().default(0),
+    late: boolean("late").notNull().default(false),
     answers: jsonb("answers")
       .$type<{ questionId: string; selected: number[]; correct: boolean }[]>()
       .notNull(),

@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { quizAttempts, quizQuestions, quizzes } from "@/db/schema";
 import { guard, isResponse, jsonError } from "@/lib/http";
 import { gradeAnswer } from "@/lib/learning/grading";
+import { ExamError, submitMock } from "@/lib/services/exams";
 import { recordEvidence, regeneratePlan } from "@/lib/services/progress";
 
 const body = z.object({
@@ -21,6 +22,14 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
   const [quiz] = await db.select().from(quizzes).where(and(eq(quizzes.id, id), eq(quizzes.userId, user.id)));
   if (!quiz) return jsonError("Cuestionario no encontrado", 404);
+  if (quiz.kind === "mock") {
+    try {
+      return NextResponse.json(await submitMock(user.id, id, parsed.data.answers));
+    } catch (e) {
+      if (e instanceof ExamError) return jsonError(e.message, e.status);
+      throw e;
+    }
+  }
   const questions = await db.select().from(quizQuestions).where(eq(quizQuestions.quizId, id)).orderBy(asc(quizQuestions.ordinal));
 
   const given = new Map(parsed.data.answers.map((a) => [a.questionId, a.selected]));

@@ -110,16 +110,23 @@ function capitalize(s: string) {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
-export function questionsFromDefinitions(defs: Definition[], count = 10, seed = 42): GeneratedQuestion[] {
-  if (defs.length < 2) return [];
+export function questionsFromDefinitions(
+  defs: Definition[],
+  count = 10,
+  seed = 42,
+  /** Definitions used for distractors (defaults to `defs`); lets a single topic borrow plausible distractors. */
+  distractorPool: Definition[] = defs,
+): GeneratedQuestion[] {
+  if (defs.length === 0 || distractorPool.length < 2) return [];
   const rnd = seeded(seed);
   const pool = shuffle(defs, rnd);
   const qs: GeneratedQuestion[] = [];
   for (let i = 0; i < pool.length && qs.length < count; i++) {
     const d = pool[i];
-    const others = shuffle(defs.filter((x) => x !== d), rnd);
+    const others = shuffle(distractorPool.filter((x) => x.term !== d.term), rnd);
+    if (others.length === 0) continue;
     const cite = `Según tus apuntes: «${short(d.sentence, 220)}»`;
-    const useMcq = defs.length >= 4 && (qs.length % 3 !== 2);
+    const useMcq = others.length >= 3 && qs.length % 3 !== 2;
     if (useMcq) {
       const distractors = others.slice(0, 3).map((o) => o.term);
       const options = shuffle([d.term, ...distractors], rnd);
@@ -140,13 +147,83 @@ export function questionsFromDefinitions(defs: Definition[], count = 10, seed = 
         prompt: `Verdadero o falso: «${d.term}» es ${short(shown)}`,
         options: ["Verdadero", "Falso"],
         correct: [isTrue ? 0 : 1],
-        explanation: isTrue
-          ? cite
-          : `Falso: esa es la definición de «${others[0].term}». ${cite}`,
+        explanation: isTrue ? cite : `Falso: esa es la definición de «${others[0].term}». ${cite}`,
         chunkId: d.chunkId,
         topicId: d.topicId,
       });
     }
   }
   return qs;
+}
+
+/**
+ * Largest-remainder allocation of `total` questions across topics proportionally
+ * to importance, capped by how many questions each topic can supply. Spare
+ * slots flow to the topics that still have material. Every topic with material
+ * gets at least one question when total allows it (exam coverage).
+ */
+export function allocateByImportance(
+  topics: { id: string; importance: number; available: number }[],
+  total: number,
+): Map<string, number> {
+  const out = new Map<string, number>();
+  const usable = topics.filter((t) => t.available > 0);
+  for (const t of usable) out.set(t.id, 0);
+  let remaining = Math.min(total, usable.reduce((a, t) => a + t.available, 0));
+  // Coverage first.
+  for (const t of [...usable].sort((a, b) => b.importance - a.importance)) {
+    if (remaining === 0) break;
+    out.set(t.id, 1);
+    remaining--;
+  }
+  while (remaining > 0) {
+    const open = usable.filter((t) => out.get(t.id)! < t.available);
+    if (open.length === 0) break;
+    const w = open.reduce((a, t) => a + t.importance, 0);
+    const shares = open.map((t) => ({ t, exact: (remaining * t.importance) / w }));
+    let given = 0;
+    for (const { t, exact } of shares) {
+      const n = Math.min(Math.floor(exact), t.available - out.get(t.id)!);
+      out.set(t.id, out.get(t.id)! + n);
+      given += n;
+    }
+    remaining -= given;
+    if (remaining > 0) {
+      const byRemainder = shares
+        .filter(({ t }) => out.get(t.id)! < t.available)
+        .sort((a, b) => (b.exact % 1) - (a.exact % 1) || b.t.importance - a.t.importance);
+      for (const { t } of byRemainder) {
+        if (remaining === 0) break;
+        out.set(t.id, out.get(t.id)! + 1);
+        remaining--;
+      }
+    }
+  }
+  return out;
+}
+
+/** Mock exam built from the notes: stratified by topic importance, distractors from the whole syllabus. */
+export function mockExamFromDefinitions(
+  defs: Definition[],
+  topics: { id: string; importance: number }[],
+  count: number,
+  seed = 7,
+): GeneratedQuestion[] {
+  const byTopic = new Map<string, Definition[]>();
+  for (const d of defs) {
+    const key = d.topicId ?? "_general";
+    byTopic.set(key, [...(byTopic.get(key) ?? []), d]);
+  }
+  const importance = new Map(topics.map((t) => [t.id, t.importance]));
+  const alloc = allocateByImportance(
+    [...byTopic.entries()].map(([id, list]) => ({ id, importance: importance.get(id) ?? 0.5, available: list.length })),
+    count,
+  );
+  const rnd = seeded(seed);
+  const qs: GeneratedQuestion[] = [];
+  let i = 0;
+  for (const [topicId, n] of alloc) {
+    if (n > 0) qs.push(...questionsFromDefinitions(byTopic.get(topicId)!, n, seed + i++, defs));
+  }
+  return shuffle(qs, rnd); // interleave topics, as in a real exam
 }

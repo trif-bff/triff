@@ -68,7 +68,7 @@ export default async function Dashboard() {
                   </div>
                   {!p.done && (
                     <Link
-                      href={p.activity === "review" ? `/review?subject=${p.subjectId}` : p.activity === "mock" ? `/subjects/${p.subjectId}#tools` : `/tutor?subject=${p.subjectId}&mode=${p.activity === "learn" ? "explain" : "practice"}&q=${encodeURIComponent(p.topicTitle ?? "")}`}
+                      href={p.activity === "review" ? `/review?subject=${p.subjectId}` : p.activity === "mock" ? `/subjects/${p.subjectId}#mock` : `/tutor?subject=${p.subjectId}&mode=${p.activity === "learn" ? "explain" : "practice"}&q=${encodeURIComponent(p.topicTitle ?? "")}`}
                       className={buttonClass("secondary", "sm")}
                     >
                       Empezar
