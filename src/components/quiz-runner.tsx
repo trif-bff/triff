@@ -5,10 +5,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { AlertTriangle, CheckCircle2, Clock, TrendingDown, TrendingUp, XCircle } from "lucide-react";
 import { Bar, Button, Card, buttonClass, cn } from "@/components/ui";
 import type { ExamReport } from "@/lib/learning/exam-report";
+import { RewardNote } from "@/components/gamification";
 
 type Q = { id: string; type: "mcq" | "true_false"; prompt: string; options: string[] };
 type Result = { questionId: string; correct: boolean; correctOptions: number[]; explanation: string; selected?: number[] };
-type Outcome = { score?: number; total?: number; report?: ExamReport; results: Result[] };
+type Rewards = { xp: number; badges: { name: string }[]; challengesCompleted: string[] };
+type Outcome = { score?: number; total?: number; report?: ExamReport; results: Result[]; rewards?: Rewards };
 
 export type MockInfo = { deadline: string; limitSec: number };
 
@@ -23,12 +25,14 @@ export function QuizRunner({
   previous,
   mock,
   initial,
+  showRewards = true,
 }: {
   quiz: { id: string; title: string; subject: string; subjectId: string; origin: string };
   questions: Q[];
   previous: { score: number; total: number }[];
   mock?: MockInfo;
   initial?: Outcome | null;
+  showRewards?: boolean;
 }) {
   const [answers, setAnswers] = useState<Record<string, number[]>>(() =>
     Object.fromEntries((initial?.results ?? []).map((r) => [r.questionId, r.selected ?? []])),
@@ -104,6 +108,7 @@ export function QuizRunner({
         )}
       </header>
 
+      {showRewards && <RewardNote rewards={outcome?.rewards} />}
       {outcome?.report ? (
         <MockReportView report={outcome.report} subjectId={quiz.subjectId} />
       ) : outcome ? (
@@ -160,7 +165,7 @@ export function QuizRunner({
       </ol>
       {error && <p role="alert" className="text-sm text-danger">{error}</p>}
       {!outcome && (
-        <div className="sticky bottom-4 card flex items-center justify-between gap-3 p-3">
+        <div className="sticky bottom-20 card flex items-center justify-between gap-3 p-3 md:bottom-4">
           <span className="text-sm text-ink-3">{answered}/{questions.length} respondidas</span>
           {isMock && remaining !== null && (
             <span

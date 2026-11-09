@@ -6,7 +6,7 @@
 | Acceso a datos ajenos (IDOR) | Toda consulta filtra por `userId` de la sesión en SQL | `src/lib/services/*`, rutas | Integración: otro usuario no puede ingerir ni recuperar |
 | CSRF | Server actions (protección de Next) + `Origin` == host en rutas + cookies `SameSite=Lax` | `src/lib/http.ts` | E2E: 403 con Origin ajeno |
 | XSS | React escapa; Markdown sin HTML crudo; enlaces `noopener nofollow`; cabeceras `X-Content-Type-Options`, `X-Frame-Options: DENY` | `markdown.tsx`, `next.config.ts` | — |
-| Fuerza bruta / abuso | Rate limit de Better Auth (30/min) + limitador por usuario y ruta | `auth/server.ts`, `usage.ts` | — |
+| Fuerza bruta / abuso | Rate limit de Better Auth (30/min, más estricto en registro e inicio de sesión) + limitador por usuario y ruta. `AUTH_RATE_LIMIT=off` existe **solo** para el servidor de E2E; nunca en producción | `auth/server.ts`, `usage.ts` | — |
 | Sesiones | Cookies httpOnly, `Secure` en producción, caducidad 14 días | Better Auth | — |
 | Contraseñas | 10–128 caracteres, hash scrypt (Better Auth) | | E2E registro |
 | Subidas maliciosas | Magic bytes, 15 MB, UTF-8 estricto para texto, nombre saneado, deduplicación SHA-256; no se guarda el binario | `extract.ts`, `documents.ts` | Unit + integración |

@@ -6,7 +6,8 @@ import { quizAttempts, quizQuestions, quizzes } from "@/db/schema";
 import { guard, isResponse, jsonError } from "@/lib/http";
 import { gradeAnswer } from "@/lib/learning/grading";
 import { ExamError, submitMock } from "@/lib/services/exams";
-import { recordEvidence, regeneratePlan } from "@/lib/services/progress";
+import { recordLearning } from "@/lib/services/gamification";
+import { regeneratePlan } from "@/lib/services/progress";
 
 const body = z.object({
   answers: z.array(z.object({ questionId: z.uuid(), selected: z.array(z.number().int().min(0).max(10)).max(10) })).max(50),
@@ -50,7 +51,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     answers: results.map(({ questionId, selected, correct }) => ({ questionId, selected, correct })),
   });
   // Unanswered questions are not evidence of anything — skip them.
-  await recordEvidence(
+  const rewards = await recordLearning(
+    user.id,
+    quiz.subjectId,
     results
       .filter((r) => r.selected.length > 0)
       .map((r) => ({ userId: user.id, subjectId: quiz.subjectId, topicId: r.topicId, kind: r.type, score: r.score, durationMs: perQuestionMs })),
@@ -60,6 +63,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   return NextResponse.json({
     score,
     total: questions.length,
+    rewards,
     results: results.map(({ questionId, correct, correctOptions, explanation }) => ({ questionId, correct, correctOptions, explanation })),
   });
 }

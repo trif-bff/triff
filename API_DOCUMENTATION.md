@@ -14,6 +14,8 @@ Todas las rutas requieren sesión (cookie de Better Auth). Las mutaciones valida
 | `POST /api/tutor` | `{ conversationId?, subjectId?, mode: explain|solver|socratic|practice, style?, message, image?: dataURL }` | **Stream de texto**. Cabeceras `X-Conversation-Id` y `X-Citations` (JSON base64 `[{ n, chunkId, filename, page }]`) |
 | `GET /api/tutor?conversationId=` | — | `{ conversation, messages }` |
 
-Server actions (formularios): `createSubject`, `updateSubject`, `deleteSubject`, `togglePlanItem`, `rebuildPlan` — todas con `requireUser()` y filtro por propietario.
+Las respuestas de `review`, `quiz/:id/submit` (práctica y simulacro) y `documents` incluyen `rewards: { xp, badges: [{ id, name }], challengesCompleted: string[] }`.
+
+Server actions (formularios): `toggleGamification`, `createSubject`, `updateSubject`, `deleteSubject`, `togglePlanItem`, `rebuildPlan` — todas con `requireUser()` y filtro por propietario.
 
 Límites: 40 operaciones de IA/día en plan gratuito (`AI_DAILY_LIMIT_FREE`), 429 al superarlo. Las operaciones fallidas no cuentan.

@@ -158,7 +158,7 @@ export function TutorChat(props: { subjects: { id: string; name: string }[]; ini
       </div>
 
       {error && <p role="alert" className="mb-2 rounded-lg bg-danger-soft px-3 py-2 text-sm text-danger">{error}</p>}
-      <form onSubmit={send} className="sticky bottom-3 card flex flex-col gap-2 p-2">
+      <form onSubmit={send} className="sticky bottom-20 card flex flex-col gap-2 p-2 md:bottom-3">
         {image && (
           <div className="relative w-fit">
             {/* eslint-disable-next-line @next/next/no-img-element -- local data URL preview */}

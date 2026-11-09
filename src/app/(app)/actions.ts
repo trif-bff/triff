@@ -7,6 +7,7 @@ import { z } from "zod";
 import { db } from "@/db";
 import { planItems, subjects } from "@/db/schema";
 import { requireUser } from "@/lib/auth/session";
+import { setGamification } from "@/lib/services/gamification";
 import { regeneratePlan } from "@/lib/services/progress";
 
 const subjectSchema = z.object({
@@ -54,5 +55,12 @@ export async function rebuildPlan(subjectId: string) {
   const user = await requireUser();
   await regeneratePlan(user.id, subjectId);
   revalidatePath(`/subjects/${subjectId}`);
+  revalidatePath("/dashboard");
+}
+
+export async function toggleGamification(enabled: boolean) {
+  const user = await requireUser();
+  await setGamification(user.id, enabled);
+  revalidatePath("/logros");
   revalidatePath("/dashboard");
 }

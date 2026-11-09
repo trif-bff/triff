@@ -22,6 +22,7 @@ export default defineConfig({
       BETTER_AUTH_URL: `http://localhost:${PORT}`,
       BETTER_AUTH_SECRET: "e2e-secret-0123456789abcdef0123456789",
       ANTHROPIC_API_KEY: "",
+      AUTH_RATE_LIMIT: "off", // many sign-ups from one IP during the suite
     },
   },
 });

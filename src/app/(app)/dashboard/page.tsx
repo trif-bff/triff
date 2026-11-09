@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { CalendarDays, Clock, Flame, Layers, Lightbulb, Target } from "lucide-react";
+import { Challenges, LevelChip } from "@/components/gamification";
 import { LearnToday } from "@/components/learn-today";
+import { gamificationSummary } from "@/lib/services/gamification";
 import { PlanCheck } from "@/components/plan-check";
 import { Bar, Card, Empty, MasteryBadge, ProgressRing, SectionTitle, buttonClass } from "@/components/ui";
 import { requireUser } from "@/lib/auth/session";
@@ -18,13 +20,15 @@ function greeting() {
 
 export default async function Dashboard() {
   const user = await requireUser();
-  const [summaries, plan, days, minutes, due] = await Promise.all([
+  const [summaries, plan, streakInfo, minutes, due, game] = await Promise.all([
     subjectSummaries(user.id),
     todaysPlan(user.id),
     streak(user.id),
     studyMinutesThisWeek(user.id),
     dueCards(user.id),
+    gamificationSummary(user.id),
   ]);
+  const days = streakInfo.streak;
   const recs = recommend(summaries);
   const withTopics = summaries.filter((s) => s.topics.length);
   const global = withTopics.length ? withTopics.reduce((a, s) => a + s.mastery, 0) / withTopics.length : 0;
@@ -33,17 +37,22 @@ export default async function Dashboard() {
 
   return (
     <div className="space-y-8">
-      <header className="rise">
+      <header className="rise flex flex-wrap items-end justify-between gap-4">
+        <div>
         <p className="text-sm text-ink-3">{new Intl.DateTimeFormat("es-ES", { weekday: "long", day: "numeric", month: "long" }).format(new Date())}</p>
         <h1 className="font-display text-3xl font-semibold sm:text-4xl">{greeting()}, {user.name.split(" ")[0]}</h1>
         {plan.length > 0 && <p className="mt-1 text-ink-2">Hoy tienes {plan.length} actividad{plan.length > 1 ? "es" : ""} en tu plan ({planDone} hecha{planDone === 1 ? "" : "s"}).</p>}
+        </div>
+        {game.enabled && <LevelChip s={game} />}
       </header>
 
       <LearnToday subjects={summaries.map((s) => ({ id: s.id, name: s.name }))} />
 
+      {game.enabled && game.challenges.length > 0 && <Challenges s={game} />}
+
       <section aria-label="Resumen" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Stat icon={Target} label="Dominio global" value={`${Math.round(global * 100)} %`} />
-        <Stat icon={Flame} label="Racha" value={`${days} día${days === 1 ? "" : "s"}`} />
+        <Stat icon={Flame} label={streakInfo.restAvailable ? "Racha · descanso disponible" : "Racha"} value={`${days} día${days === 1 ? "" : "s"}`} />
         <Stat icon={Clock} label="Estudio (7 días)" value={`${minutes} min`} />
         <Stat icon={Layers} label="Tarjetas pendientes" value={String(due)} href={due ? "/review" : undefined} />
       </section>

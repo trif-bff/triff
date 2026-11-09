@@ -5,7 +5,8 @@ import { db } from "@/db";
 import { flashcards, reviewLogs, subjects } from "@/db/schema";
 import { guard, isResponse, jsonError } from "@/lib/http";
 import { gradeToScore, isGrade, review } from "@/lib/learning/srs";
-import { recordEvidence } from "@/lib/services/progress";
+import { grantXp, recordLearning } from "@/lib/services/gamification";
+import { XP } from "@/lib/learning/gamification";
 
 const body = z.object({
   cardId: z.uuid(),
@@ -27,12 +28,15 @@ export async function POST(req: Request) {
     .where(and(eq(flashcards.id, cardId), eq(flashcards.userId, user.id)));
   if (!row) return jsonError("Tarjeta no encontrada", 404);
 
+  const now = new Date();
+  const wasDue = row.card.due <= now; // XP only for reviews that were due: no farming by re-reviewing
   const exam = row.examDate ? new Date(`${row.examDate}T08:00:00`) : null;
-  const next = review(row.card, rating as 1 | 2 | 3 | 4, new Date(), exam);
+  const next = review(row.card, rating as 1 | 2 | 3 | 4, now, exam);
   await db.update(flashcards).set(next).where(eq(flashcards.id, cardId));
   await db.insert(reviewLogs).values({ flashcardId: cardId, userId: user.id, rating, durationMs });
-  await recordEvidence([
+  const reviewXp = wasDue ? await grantXp(user.id, { kind: "review", amount: XP.review }) : 0;
+  const rewards = await recordLearning(user.id, row.card.subjectId, [
     { userId: user.id, subjectId: row.card.subjectId, topicId: row.card.topicId, kind: "flashcard", score: gradeToScore(rating as 1 | 2 | 3 | 4), durationMs },
   ]);
-  return NextResponse.json({ due: next.due, state: next.state });
+  return NextResponse.json({ due: next.due, state: next.state, rewards: { ...rewards, xp: rewards.xp + reviewXp } });
 }

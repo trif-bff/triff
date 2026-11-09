@@ -5,6 +5,7 @@ import { flashcards, subjects, topics } from "@/db/schema";
 import { ReviewSession } from "@/components/review-session";
 import { Empty, buttonClass } from "@/components/ui";
 import { requireUser } from "@/lib/auth/session";
+import { gamificationEnabled } from "@/lib/services/gamification";
 
 export const metadata = { title: "Repaso" };
 
@@ -34,7 +35,7 @@ export default async function ReviewPage({ searchParams }: { searchParams: Promi
           <Link href="/subjects" className={buttonClass("secondary", "sm")}>Ir a asignaturas</Link>
         </Empty>
       ) : (
-        <ReviewSession cards={cards} />
+        <ReviewSession cards={cards} showRewards={await gamificationEnabled(user.id)} />
       )}
     </div>
   );

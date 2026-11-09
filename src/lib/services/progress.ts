@@ -3,6 +3,7 @@ import { and, asc, count, desc, eq, gte, lte, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { evidence, flashcards, planItems, subjects, topics } from "@/db/schema";
 import { decideNextStep, estimateMastery, type MasteryEstimate, type NextStep } from "@/lib/learning/mastery";
+import { computeStreak } from "@/lib/learning/gamification";
 import { buildPlan } from "@/lib/learning/planner";
 
 export async function recordEvidence(rows: {
@@ -47,9 +48,11 @@ export function overallMastery(tm: TopicMastery[]) {
   return tm.reduce((a, t) => a + t.importance * t.estimate.p * (t.estimate.level === "not_started" ? 0 : 1), 0) / w;
 }
 
-export function todayIso() {
-  const d = new Date();
-  return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+/** The student's calendar day. Spain-first for now; a per-user time zone arrives with profiles. */
+export const STUDY_TZ = "Europe/Madrid";
+
+export function todayIso(now = new Date()) {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: STUDY_TZ, year: "numeric", month: "2-digit", day: "2-digit" }).format(now);
 }
 
 export async function regeneratePlan(userId: string, subjectId: string) {
@@ -71,20 +74,17 @@ export async function regeneratePlan(userId: string, subjectId: string) {
 }
 
 /** Consecutive days (ending today or yesterday) with at least one piece of learning evidence. */
+export async function activeDays(userId: string, days = 400) {
+  const rows = await db.execute<{ day: string; n: number }>(sql`
+    select to_char(created_at at time zone ${STUDY_TZ}, 'YYYY-MM-DD') as day, count(*)::int as n
+    from evidence where user_id = ${userId} and created_at > now() - make_interval(days => ${days})
+    group by 1`);
+  return new Map(rows.rows.map((r) => [r.day, r.n]));
+}
+
+/** Streak with one rest day per week allowed (see learning/gamification.ts). */
 export async function streak(userId: string) {
-  const rows = await db.execute<{ day: string }>(sql`
-    select distinct to_char(created_at at time zone 'Europe/Madrid', 'YYYY-MM-DD') as day
-    from evidence where user_id = ${userId} and created_at > now() - interval '400 days'
-    order by day desc`);
-  const days = new Set(rows.rows.map((r) => r.day));
-  let n = 0;
-  const d = new Date(`${todayIso()}T12:00:00Z`);
-  if (!days.has(d.toISOString().slice(0, 10))) d.setUTCDate(d.getUTCDate() - 1);
-  while (days.has(d.toISOString().slice(0, 10))) {
-    n++;
-    d.setUTCDate(d.getUTCDate() - 1);
-  }
-  return n;
+  return computeStreak(new Set((await activeDays(userId)).keys()), todayIso());
 }
 
 export async function studyMinutesThisWeek(userId: string) {

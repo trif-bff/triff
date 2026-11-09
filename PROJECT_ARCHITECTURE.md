@@ -74,6 +74,7 @@ Principios: calidad pedagógica sobre número de funciones · fidelidad a las fu
 - **Decisión** (`decideNextStep`): aprender · practicar · evaluar (si el buen resultado tiene poca evidencia o un único formato) · explicar de otra forma (3 fallos seguidos) · avanzar.
 - **Planificador**: prioridad = importancia × (1 − dominio) × 1,5 si laguna; repasos espaciados a +1/+3/+7 días; simulacro la víspera; respeta minutos diarios; se recalcula al subir apuntes, entregar cuestionarios o cambiar ajustes. Cada ítem guarda su motivo.
 - **FSRS consciente del examen**: nunca programa un repaso después de la fecha del examen.
+- **Gamificación** (`learning/gamification.ts`): premia constancia y mejora real. Tope diario de XP por actividad; XP de mejora idempotente (una vez por logro); racha con 1 día de descanso semanal; retos diarios persistidos y medidos con evidencias; insignias por logros, nunca por tiempo conectado; desactivable por el estudiante.
 - **Tutor**: 4 modos (Explicar con 6 estilos, Resolver en 7 pasos, Socrático, Práctica con clasificación del error). Citas `[n]` a fragmentos reales; modo "solo mis apuntes".
 
 ## 6. RAG y documentos (Fase 11)
@@ -121,7 +122,7 @@ Infraestructura MVP: un Postgres gestionado (~$25–50/mes) + hosting Next.js. V
 | 12 Motor adaptativo | ✅ v1 (dominio + decisiones + lagunas) · ⏳ grafo de prerrequisitos |
 | 13 Simulacros | ✅ examen escrito cronometrado (v0.2, sin IA: ABCD y V/F) · ⏳ preguntas abiertas con rúbrica (requiere IA), examen oral |
 | 15 Voz y podcasts | ⏳ |
-| 16 Gamificación | ⏳ (racha ya calculada) |
+| 16 Gamificación | ✅ v0.4: XP con tope diario e idempotente, niveles, racha con descanso, retos diarios, insignias, página Logros, opción de ocultar |
 | 17 Monetización (Stripe) | ⏳ cuotas ya aplicadas |
 | 18 Admin | ⏳ (rol `admin` y `audit_log` ya en el esquema) |
 | 19–21 Testing, optimización, despliegue | 🟡 tests en CI; despliegue pendiente de autorización |

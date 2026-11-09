@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.4.0] — 2026-11-09 — Gamificación (Fase 10)
+### Añadido
+- **XP** por actividad real (repasos que tocaban, preguntas respondidas y acertadas, apuntes, simulacros) con **tope diario de 150 XP** para que no compense «farmear».
+- **XP por mejora real**: subir de nivel de dominio en un tema, dominarlo, superar una laguna o mejorar la nota del simulacro anterior. Claves idempotentes: cada logro paga una sola vez aunque el conocimiento decaiga y se recupere.
+- **Niveles** (curva suave) con títulos y progreso al siguiente nivel.
+- **Racha sana**: 1 día de descanso permitido por semana; el día del estudiante se calcula en hora de Madrid.
+- **3 retos diarios** fijados al empezar el día y adaptados a la situación (tarjetas pendientes, tema más débil, temas del plan); se completan con evidencias reales, no marcando casillas.
+- **10 insignias** (primeros apuntes, primer simulacro, mejora real, tema dominado, laguna superada, constancia de 7 y 30 días, 100 repasos, temario completo, listo/a para el examen).
+- Página **Logros**: nivel, racha, retos, calendario de actividad de 12 semanas, insignias y reglas transparentes. **Interruptor para ocultar** la gamificación.
+- Recompensas visibles al terminar repasos, cuestionarios y simulacros.
+- Móvil: navegación en **barra inferior de pestañas**.
+- Errores de acceso traducidos al español (incluido «demasiados intentos»).
+### Corregido
+- La barra superior móvil se desbordaba al añadir secciones.
+
 ## [0.3.0] — 2026-11-09 — OCR de fotos y PDF escaneados (Fase 11)
 ### Añadido
 - Subida de fotos de apuntes (PNG, JPG, WEBP) y botón «Hacer una foto» con la cámara del móvil.

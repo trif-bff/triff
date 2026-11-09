@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { quizAttempts, quizQuestions, quizzes, subjects } from "@/db/schema";
 import { QuizRunner } from "@/components/quiz-runner";
 import { getMockResult } from "@/lib/services/exams";
+import { gamificationEnabled } from "@/lib/services/gamification";
 import { requireUser } from "@/lib/auth/session";
 
 export const metadata = { title: "Cuestionario" };
@@ -28,5 +29,5 @@ export default async function QuizPage({ params }: { params: Promise<{ id: strin
   const isMock = quiz.kind === "mock" && quiz.startedAt && quiz.timeLimitSec;
   const mock = isMock ? { deadline: new Date(quiz.startedAt!.getTime() + quiz.timeLimitSec! * 1000).toISOString(), limitSec: quiz.timeLimitSec! } : undefined;
   const initial = isMock ? await getMockResult(user.id, quiz.id) : null;
-  return <QuizRunner quiz={quiz} questions={questions} previous={previous.map((p) => ({ score: p.score, total: p.total }))} mock={mock} initial={initial} />;
+  return <QuizRunner quiz={quiz} questions={questions} previous={previous.map((p) => ({ score: p.score, total: p.total }))} mock={mock} initial={initial} showRewards={await gamificationEnabled(user.id)} />;
 }

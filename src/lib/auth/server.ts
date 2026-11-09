@@ -26,7 +26,9 @@ export const auth = betterAuth({
     },
   },
   session: { expiresIn: 60 * 60 * 24 * 14, updateAge: 60 * 60 * 24 },
-  rateLimit: { enabled: true, window: 60, max: 30, storage: "memory" },
+  // Brute-force protection. AUTH_RATE_LIMIT=off exists ONLY for the E2E test server,
+  // which registers many accounts from one IP; never set it in production.
+  rateLimit: { enabled: process.env.AUTH_RATE_LIMIT !== "off", window: 60, max: 30, storage: "memory" },
   advanced: { useSecureCookies: process.env.NODE_ENV === "production" },
   plugins: [nextCookies()],
 });

@@ -6,7 +6,9 @@ import { buildExamReport, type ExamReport } from "@/lib/learning/exam-report";
 import { gradeAnswer } from "@/lib/learning/grading";
 import { extractDefinitions, mockExamFromDefinitions, type SourceChunk } from "@/lib/learning/heuristic";
 import { loadChunks } from "./generation";
-import { recordEvidence, regeneratePlan } from "./progress";
+import { XP } from "@/lib/learning/gamification";
+import { grantXp, recordLearning, type Rewards } from "./gamification";
+import { regeneratePlan } from "./progress";
 
 export const MOCK_LIMITS = { minQuestions: 5, maxQuestions: 40, minMinutes: 5, maxMinutes: 180 };
 
@@ -81,6 +83,7 @@ async function previousMockGrades(userId: string, subjectId: string, before: Dat
 
 export type MockResult = {
   report: ExamReport;
+  rewards?: Rewards;
   results: { questionId: string; correct: boolean; selected: number[]; correctOptions: number[]; explanation: string }[];
 };
 
@@ -122,13 +125,19 @@ export async function submitMock(userId: string, quizId: string, answers: { ques
     answers: scored.map((s) => ({ questionId: s.q.id, selected: s.selected, correct: s.score === 1 })),
   });
   const perItemMs = scored.length ? Math.round(Math.min(report.usedSec, limitSec) * 1000 / scored.length) : 0;
-  await recordEvidence(
+  let xp = await grantXp(userId, { kind: "mock_completed", amount: XP.mockCompleted, key: `mock:${quizId}` });
+  if (report.trend.delta !== null && report.trend.delta > 0) {
+    xp += await grantXp(userId, { kind: "mock_improvement", amount: Math.round(report.trend.delta * XP.mockImprovementPerPoint), key: `mockimp:${quizId}`, meta: { delta: report.trend.delta } });
+  }
+  const rewards = await recordLearning(
+    userId,
+    mock.quiz.subjectId,
     scored
       .filter((s) => s.selected.length > 0)
       .map((s) => ({ userId, subjectId: mock.quiz.subjectId, topicId: s.q.topicId, kind: s.q.type, score: s.score, durationMs: perItemMs })),
   );
   await regeneratePlan(userId, mock.quiz.subjectId);
-  return { report, results: toResults(scored) };
+  return { report, results: toResults(scored), rewards: { ...rewards, xp: rewards.xp + xp } };
 }
 
 function toResults(scored: ReturnType<typeof scoreAnswers>) {

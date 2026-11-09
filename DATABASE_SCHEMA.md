@@ -16,6 +16,10 @@ PostgreSQL 16 + pgvector. Fuente de verdad: `src/db/schema.ts`; migraciones en `
 | `evidence` | **Toda observación de aprendizaje** (kind, score 0–1, duración). El dominio se deriva de aquí | idx (`user_id`,`topic_id`), (`user_id`,`created_at`) |
 | `plan_items` | Plan diario: actividad, minutos, **motivo**, hecho | idx (`user_id`,`day`) |
 | `conversations`, `messages` | Historial del tutor con citas | idx (`conversation_id`,`created_at`) |
+| `xp_events` | Libro de XP: tipo, cantidad, `key` única por usuario (idempotencia), metadatos | único (`user_id`,`key`), idx (`user_id`,`created_at`) |
+| `user_badges` | Insignias conseguidas y fecha | único (`user_id`,`badge`) |
+| `daily_challenges` | Retos del día: tipo, objetivo, tema, completado | único (`user_id`,`day`,`slot`) |
+| `user_settings` | Preferencias (p. ej. `gamification` on/off) | PK `user_id` |
 | `ai_usage` | Consumo por operación: proveedor, modelo, tokens, `success`, `billable` (= success) | idx (`user_id`,`created_at`) |
 | `audit_log` | Eventos relevantes (ingesta, futuras acciones de admin) | |
 

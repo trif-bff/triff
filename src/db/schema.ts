@@ -412,3 +412,62 @@ export const auditLog = pgTable("audit_log", {
   meta: jsonb("meta").$type<Record<string, unknown>>().notNull().default({}),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+/* ------------------------------------------------------------------ */
+/* Gamification                                                        */
+/* ------------------------------------------------------------------ */
+
+/** Every XP grant. `key` makes grants idempotent (one reward per achievement). */
+export const xpEvents = pgTable(
+  "xp_events",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    kind: text("kind").notNull(),
+    amount: integer("amount").notNull(),
+    key: text("key").notNull(),
+    meta: jsonb("meta").$type<Record<string, unknown>>().notNull().default({}),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("xp_events_user_key_uq").on(t.userId, t.key), index("xp_events_user_time_idx").on(t.userId, t.createdAt)],
+);
+
+export const userBadges = pgTable(
+  "user_badges",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    badge: text("badge").notNull(),
+    earnedAt: timestamp("earned_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("user_badges_pk").on(t.userId, t.badge)],
+);
+
+export const dailyChallenges = pgTable(
+  "daily_challenges",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    day: date("day", { mode: "string" }).notNull(),
+    slot: integer("slot").notNull(),
+    kind: text("kind").notNull(),
+    title: text("title").notNull(),
+    target: integer("target").notNull(),
+    topicId: uuid("topic_id").references(() => topics.id, { onDelete: "set null" }),
+    completedAt: timestamp("completed_at", { withTimezone: true }),
+  },
+  (t) => [uniqueIndex("daily_challenges_user_day_slot_uq").on(t.userId, t.day, t.slot)],
+);
+
+export const userSettings = pgTable("user_settings", {
+  userId: text("user_id")
+    .primaryKey()
+    .references(() => user.id, { onDelete: "cascade" }),
+  gamification: boolean("gamification").notNull().default(true),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});

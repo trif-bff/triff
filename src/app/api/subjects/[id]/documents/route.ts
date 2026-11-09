@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { guard, isResponse, jsonError } from "@/lib/http";
 import { ingestDocument, UploadError } from "@/lib/services/documents";
+import { XP } from "@/lib/learning/gamification";
+import { finish, grantXp } from "@/lib/services/gamification";
 import { regeneratePlan } from "@/lib/services/progress";
 
 export const maxDuration = 300; // OCR of a scanned PDF can take a while (≤25 pages)
@@ -21,7 +23,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       bytes: new Uint8Array(await file.arrayBuffer()),
     });
     await regeneratePlan(user.id, id);
-    return NextResponse.json(result, { status: 201 });
+    const rewards = await finish(user.id, await grantXp(user.id, { kind: "document", amount: XP.documentUploaded, key: `doc:${result.id}` }));
+    return NextResponse.json({ ...result, rewards }, { status: 201 });
   } catch (e) {
     if (e instanceof UploadError) return jsonError(e.message, e.status);
     console.error(e);

@@ -13,12 +13,14 @@ const GRADES = [
   { rating: 4, label: "Fácil", key: "4", hint: "Inmediata", cls: "border-primary/40 hover:bg-primary-soft" },
 ];
 
-export function ReviewSession({ cards }: { cards: C[] }) {
+export function ReviewSession({ cards, showRewards = true }: { cards: C[]; showRewards?: boolean }) {
   const router = useRouter();
   const [queue, setQueue] = useState(cards);
   const [shown, setShown] = useState(false);
   const [done, setDone] = useState(0);
   const [stats, setStats] = useState({ again: 0, ok: 0 });
+  const [xp, setXp] = useState(0);
+  const [badges, setBadges] = useState<string[]>([]);
   const started = useRef(0);
   useEffect(() => {
     started.current = Date.now();
@@ -35,7 +37,12 @@ export function ReviewSession({ cards }: { cards: C[] }) {
     setDone((d) => d + 1);
     setStats((s) => (rating === 1 ? { ...s, again: s.again + 1 } : { ...s, ok: s.ok + 1 }));
     started.current = Date.now();
-    await fetch("/api/review", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ cardId: current.id, rating, durationMs: Math.min(durationMs, 600000) }) });
+    const res = await fetch("/api/review", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ cardId: current.id, rating, durationMs: Math.min(durationMs, 600000) }) });
+    const data = await res.json().catch(() => null);
+    if (data?.rewards) {
+      setXp((x) => x + data.rewards.xp);
+      if (data.rewards.badges.length) setBadges((b) => [...b, ...data.rewards.badges.map((x: { name: string }) => x.name)]);
+    }
   }
 
   useEffect(() => {
@@ -53,6 +60,9 @@ export function ReviewSession({ cards }: { cards: C[] }) {
       <Card className="rise text-center">
         <p className="font-display text-2xl font-semibold">Sesión terminada</p>
         <p className="mt-2 text-ink-2">{stats.ok} recordadas · {stats.again} a repasar de nuevo</p>
+        {showRewards && (xp > 0 || badges.length > 0) && (
+          <p className="mt-2 text-sm font-medium text-accent">+{xp} XP{badges.length ? ` · Insignia: ${badges.join(", ")}` : ""}</p>
+        )}
         <Button className="mt-5" onClick={() => router.refresh()}>Volver a comprobar</Button>
       </Card>
     );
@@ -63,6 +73,7 @@ export function ReviewSession({ cards }: { cards: C[] }) {
       <div className="flex items-center gap-3 text-sm text-ink-3">
         <Bar value={done / (done + queue.length)} />
         <span className="shrink-0 tabular-nums">{queue.length} restantes</span>
+        {showRewards && xp > 0 && <span className="shrink-0 font-medium text-accent tabular-nums">+{xp} XP</span>}
       </div>
       <Card key={card.id + done} className="rise min-h-64 p-8">
         <p className="mb-4 text-xs font-medium uppercase tracking-wider text-ink-3">

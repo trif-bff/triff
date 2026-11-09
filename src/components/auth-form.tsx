@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { authClient } from "@/lib/auth/client";
+import { authErrorMessage } from "@/lib/auth/messages";
 import { Button, Card, Input, Label } from "@/components/ui";
 
 export function AuthForm({ mode }: { mode: "login" | "register" }) {
@@ -25,7 +26,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         : await authClient.signIn.email({ email, password });
     setPending(false);
     if (res.error) {
-      setError(res.error.message ?? "No se ha podido completar la operación");
+      setError(authErrorMessage(res.error));
       return;
     }
     const next = params.get("next");

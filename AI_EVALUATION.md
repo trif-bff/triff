@@ -22,7 +22,9 @@ Una funcionalidad de IA no está terminada porque "responda": debe medirse. Este
 
 **Pendiente de medir (OCR):** precisión sobre un corpus real (apuntes impresos fotografiados con móvil, fotocopias, manuscritos) con CER/WER por tipo. Las fixtures actuales son texto impreso renderizado; no demuestran la calidad con letra manuscrita.
 
-Resultado actual: **67 tests de Vitest + 8 E2E de Playwright en verde**.
+| Gamificación sin efectos perversos | Tope diario de XP, idempotencia de logros (caer y recuperar no paga dos veces), retos medidos con evidencias reales, racha con descanso, insignias por logros | `tests/unit/gamification.test.ts`, `tests/integration/gamification.test.ts`, E2E |
+
+Resultado actual: **88 tests de Vitest + 10 E2E de Playwright en verde** (más 1 E2E solo móvil omitido en escritorio).
 
 ## 2. Pendiente de medir con proveedor de IA (requiere tu autorización por coste)
 Conjunto propuesto de evaluación (`evals/`, a crear):
