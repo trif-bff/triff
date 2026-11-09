@@ -19,6 +19,7 @@ La primera migración ejecuta `CREATE EXTENSION IF NOT EXISTS vector` (el rol ne
 2. `pnpm build && pnpm start`, o la imagen `Dockerfile` (no verificada en este entorno: Docker sin daemon).
 3. Vercel: funciona sin cambios (rutas con `maxDuration` 120 s para ingesta y tutor). Postgres gestionado externo.
 4. Activar IA: `AI_PROVIDER` + clave; embeddings opcionales con `EMBEDDINGS_PROVIDER`.
+5. **OCR**: requiere los binarios `tesseract` (con `spa`/`cat`) y `pdftoppm`, incluidos en el `Dockerfile`. En plataformas sin ellos (p. ej. Vercel serverless) el OCR se desactiva automáticamente y se informa al usuario; para tenerlo allí, mover la ingesta a un worker con la imagen Docker (previsto con la cola pg-boss).
 
 ## CI
 `.github/workflows/ci.yml`: lint → typecheck → migraciones → unit/integración → build → E2E (Postgres pgvector como servicio).

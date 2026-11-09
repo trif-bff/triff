@@ -12,7 +12,7 @@
 | PostgreSQL | 16.15 local; **pgvector 0.6.0** instalado vía apt (`postgresql-16-pgvector`) |
 | Redis | 7.0.15 instalado (no usado aún en el MVP) |
 | Docker | Cliente 29.9.2, **sin daemon** en este entorno → Dockerfile no verificable aquí |
-| Herramientas de documentos | poppler-utils (pdftotext), ffmpeg presentes; **sin Tesseract** |
+| Herramientas de documentos | poppler-utils (pdftotext, pdftoppm), ffmpeg presentes; **Tesseract 5.3 (spa, cat, eng) instalado en la v0.3** |
 | Navegador | Chromium + Playwright 1.63 preinstalados |
 | Red | npm y api.anthropic.com accesibles; **api.openai.com y astra-ai.co bloqueados** por la política de red |
 | Credenciales | Ninguna clave de IA, Stripe, Supabase ni email configurada |
@@ -61,7 +61,8 @@ Principios: calidad pedagógica sobre número de funciones · fidelidad a las fu
 | Auth | **Better Auth 1.7** (email+contraseña) | Self-hosted, sesiones en BD, rate limit integrado, plugins (2FA, organizaciones, admin). Alternativas: Supabase Auth (acopla), Auth.js (menos completo para email/password). |
 | IA | **Vercel AI SDK 7** + `@ai-sdk/anthropic` / `openai` / `google` | El encargo exige multiproveedor; el SDK unifica streaming, salida estructurada (Zod) y multimodal. Modelo por defecto: **Claude Opus 5.5** (configurable por variable). |
 | Repetición espaciada | **ts-fsrs 6 (FSRS-6)** | Mejor que SM-2 en los benchmarks abiertos (open-spaced-repetition/srs-benchmark): menos repasos para la misma retención. |
-| Documentos | **unpdf** (PDF.js serverless), **mammoth** (DOCX) | Puro JS, sin binarios. OCR → Fase 11. |
+| Documentos | **unpdf** (PDF.js serverless), **mammoth** (DOCX) | Puro JS, sin binarios. |
+| OCR | **Tesseract 5 local** (spa+cat+eng) vía CLI + **pdftoppm** | Gratis, privado (nada sale del servidor), buena precisión en texto impreso. Descartados por ahora: OCR en la nube (Google Vision, Textract, Azure: coste y datos de menores fuera), tesseract.js (descarga modelos en tiempo de ejecución, más lento). La visión del LLM se reserva para manuscritos cuando haya proveedor. |
 | Markdown/fórmulas | react-markdown + remark-math + rehype-katex | Seguro por defecto (sin HTML crudo). |
 | Tests | Vitest 5 · Playwright 1.63 | Unit + integración contra Postgres real + E2E contra build de producción. |
 | Colas (futuro) | **pg-boss** (sobre Postgres) | Evita Redis para jobs al principio; Redis queda para rate limiting distribuido/caché. |
@@ -77,10 +78,10 @@ Principios: calidad pedagógica sobre número de funciones · fidelidad a las fu
 
 ## 6. RAG y documentos (Fase 11)
 
-Pipeline implementado: recepción → validación (magic bytes, 15 MB, duplicado por SHA-256) → extracción (por página en PDF) → chunking por estructura (≈1200 caracteres, solape 150) → escaneo anti-injection → índice FTS (`tsvector` generado, español, GIN) → embeddings opcionales (HNSW coseno) → temas.
+Pipeline implementado: recepción → validación (magic bytes, 15 MB, dimensiones de imagen, duplicado por SHA-256) → extracción (por página en PDF) → **OCR de imágenes y de páginas sin texto** (Tesseract, confianza por documento) → chunking por estructura (≈1200 caracteres, solape 150) → escaneo anti-injection → índice FTS (`tsvector` generado, español, GIN) → embeddings opcionales (HNSW coseno) → temas.
 Recuperación: **híbrida FTS + vectorial con Reciprocal Rank Fusion**, con fallback OR para preguntas en lenguaje natural; siempre filtrada por propietario en SQL.
 
-Pendiente: OCR (Tesseract/servicio de visión del LLM para fotos y escaneados), PPTX/XLSX, enlaces y vídeo, detección de contradicciones entre fuentes, re-ranking, procesamiento en cola.
+Pendiente: manuscritos con visión del LLM, preprocesado de fotos (enderezado, contraste), PPTX/XLSX, enlaces y vídeo, detección de contradicciones entre fuentes, re-ranking, procesamiento en cola.
 
 ## 7. Costes estimados de IA
 
@@ -103,7 +104,7 @@ Infraestructura MVP: un Postgres gestionado (~$25–50/mes) + hosting Next.js. V
 | Prompt injection desde documentos | Fuentes como datos delimitados y neutralizados, detección, sin herramientas con efectos |
 | Menores de edad (ESO) | RGPD + LOPDGDD: consentimiento parental < 14 años en España; minimización de datos; ver SECURITY.md |
 | Coste de IA descontrolado | Cuotas, registro por operación, modelos configurables, caching |
-| PDFs escaneados sin texto | Error explícito hoy; OCR en Fase 11 |
+| PDFs escaneados / fotos | OCR local (v0.3); confianza visible; manuscritos con visión del LLM cuando haya proveedor |
 | Currículos oficiales inventados | Solo fuentes institucionales (BOE, boletines autonómicos) o temario aportado por el usuario |
 | Rate limit en memoria (un proceso) | Redis/Upstash al escalar horizontalmente |
 | Dependencia de un proveedor | Registro multiproveedor por configuración |
@@ -114,7 +115,7 @@ Infraestructura MVP: un Postgres gestionado (~$25–50/mes) + hosting Next.js. V
 |---|---|
 | 0–1 Auditoría, investigación, skills, agentes, MCP | ✅ (instalación de plugins del catálogo pendiente de tu confirmación) |
 | 2–3 Arquitectura y diseño visual | ✅ sistema de diseño propio, claro/oscuro, responsive |
-| 4–8 BD, auth, dashboard, documentos, tutor | ✅ MVP (falta: recuperación de contraseña por email real, OCR) |
+| 4–8 BD, auth, dashboard, documentos, tutor | ✅ MVP + OCR (v0.3) (falta: recuperación de contraseña por email real) |
 | 9 Exam Prep (plan) | ✅ plan adaptativo; falta estimación por horas totales y exámenes anteriores |
 | 10 Herramientas | ✅ flashcards FSRS, ABCD, V/F · ⏳ Smart Text, ejercicios con rúbrica, podcasts |
 | 12 Motor adaptativo | ✅ v1 (dominio + decisiones + lagunas) · ⏳ grafo de prerrequisitos |

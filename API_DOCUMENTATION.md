@@ -5,7 +5,7 @@ Todas las rutas requieren sesión (cookie de Better Auth). Las mutaciones valida
 | Método y ruta | Cuerpo | Respuesta |
 |---|---|---|
 | `GET/POST /api/auth/*` | Endpoints estándar de Better Auth (registro, inicio y cierre de sesión, recuperación de contraseña) | Sesión |
-| `POST /api/subjects/:id/documents` | `multipart/form-data` con `file` (PDF/DOCX/TXT/MD ≤ 15 MB) | `201 { id, chunks, injectionFlags, pageCount }` · 409 duplicado · 413 tamaño · 415 formato · 422 sin texto |
+| `POST /api/subjects/:id/documents` | `multipart/form-data` con `file` (PDF —también escaneado—, DOCX, TXT, MD, PNG, JPG, WEBP ≤ 15 MB; imágenes ≤ 40 MP) | `201 { id, chunks, injectionFlags, pageCount, ocr: null \| { pages, confidence, skippedPages, lowConfidence } }` · 409 duplicado · 413 tamaño · 415 formato · 422 sin texto legible. Hasta 300 s con OCR |
 | `POST /api/subjects/:id/flashcards` | `{ topicId?: uuid, count?: 1–40 }` | `{ created, origin: "ai"|"heuristic"|"none", message? }` |
 | `POST /api/subjects/:id/quizzes` | `{ topicId?: uuid, count?: 3–30 }` | `{ quizId, origin, message? }` |
 | `POST /api/subjects/:id/mocks` | `{ questions?: 5–40 (20), minutes?: 5–180 (30) }` | `201 { quizId, questions }` · 422 si no hay apuntes o no alcanzan 5 preguntas. El reloj empieza en el servidor |

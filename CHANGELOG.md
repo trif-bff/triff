@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.3.0] — 2026-11-09 — OCR de fotos y PDF escaneados (Fase 11)
+### Añadido
+- Subida de fotos de apuntes (PNG, JPG, WEBP) y botón «Hacer una foto» con la cámara del móvil.
+- OCR local con **Tesseract 5** (español, catalán e inglés): sin servicios externos ni coste; los archivos no salen del servidor.
+- PDF escaneados o mixtos: solo se rasterizan (poppler, 200 ppp) y se leen las páginas **sin capa de texto**; se conservan los números de página para las citas.
+- Confianza del OCR por documento (media ponderada por palabra), insignia «OCR · N %» y aviso de «lectura dudosa» por debajo del 70 %.
+- Seguridad: validación por magic bytes, lectura de dimensiones desde la cabecera para rechazar «bombas de descompresión» (> 40 MP), `execFile` sin shell con tiempo máximo por página, límite de 25 páginas de OCR por archivo y directorio temporal privado que siempre se borra.
+- Mensajes claros cuando no se puede leer texto o cuando el servidor no tiene OCR.
+- Dockerfile y CI con Tesseract y poppler. Fixtures reproducibles (`scripts/make-ocr-fixtures.mjs`).
+- Tests: +12 (unit e integración) y E2E de foto con OCR y de PDF con texto sin OCR.
+### Limitaciones conocidas
+- Tesseract está pensado para texto impreso: la letra manuscrita se acepta pero suele dar confianza baja. Con un proveedor de IA activado se usará visión del modelo para esos casos.
+
 ## [0.2.0] — 2026-11-09 — Simulacro de examen escrito (Fase 8)
 ### Añadido
 - Simulacros cronometrados por asignatura: número de preguntas y duración configurables; el tiempo lo controla el servidor (`started_at`) y la entrega es automática al llegar a cero.

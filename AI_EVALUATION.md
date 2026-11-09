@@ -18,7 +18,11 @@ Una funcionalidad de IA no está terminada porque "responda": debe medirse. Este
 | Simulacro: cobertura y pesos | Reparto exacto, proporcional a la importancia, cubre todos los temas con material, nunca supera el material disponible | `tests/unit/mock-exam.test.ts` |
 | Simulacro: validez de la nota | Escala 0–10, sin respuesta ≠ evidencia, comparación con el anterior, retraso con el reloj del servidor | unit + integración + E2E |
 
-Resultado actual: **55 tests de Vitest + 8 E2E de Playwright en verde**.
+| OCR | Foto y PDF escaneado de apuntes en español: texto recuperado (confianza > 80 %), temas detectados, citas con página correcta, material generado a partir del texto; imágenes en blanco y bombas rechazadas | `tests/unit/ocr.test.ts`, `tests/integration/ocr.test.ts`, E2E |
+
+**Pendiente de medir (OCR):** precisión sobre un corpus real (apuntes impresos fotografiados con móvil, fotocopias, manuscritos) con CER/WER por tipo. Las fixtures actuales son texto impreso renderizado; no demuestran la calidad con letra manuscrita.
+
+Resultado actual: **67 tests de Vitest + 8 E2E de Playwright en verde**.
 
 ## 2. Pendiente de medir con proveedor de IA (requiere tu autorización por coste)
 Conjunto propuesto de evaluación (`evals/`, a crear):

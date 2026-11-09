@@ -3,7 +3,7 @@ import { guard, isResponse, jsonError } from "@/lib/http";
 import { ingestDocument, UploadError } from "@/lib/services/documents";
 import { regeneratePlan } from "@/lib/services/progress";
 
-export const maxDuration = 120;
+export const maxDuration = 300; // OCR of a scanned PDF can take a while (≤25 pages)
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const user = await guard(req, { limit: 10 });

@@ -13,6 +13,10 @@ COPY . .
 RUN pnpm build
 
 FROM base AS runtime
+# Local OCR: Tesseract (Spanish, Catalan, English) + poppler to rasterise scanned PDFs
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-spa tesseract-ocr-cat poppler-utils \
+ && rm -rf /var/lib/apt/lists/*
 ENV NODE_ENV=production PORT=3000
 COPY --from=build /app ./
 USER node

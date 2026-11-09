@@ -103,6 +103,13 @@ test.describe.serial("MVP acceptance flow", () => {
     await page.getByTestId("file-input").setInputFiles({ name: "calculo.pdf", mimeType: "application/pdf", buffer: pdf });
     await expect(page.getByRole("status")).toContainText("fragmentos indexados", { timeout: 20_000 });
     await expect(page.getByText("2 págs.")).toBeVisible();
+    await expect(page.getByText(/OCR ·/)).toHaveCount(0); // text-layer PDF: no OCR needed
+
+    // A photo of handwritten-style notes goes through OCR.
+    await page.getByTestId("file-input").setInputFiles(path.join(__dirname, "../fixtures/apuntes-foto.jpg"));
+    await expect(page.getByRole("status")).toContainText("texto reconocido en 1 página", { timeout: 60_000 });
+    await expect(page.getByText(/OCR · \d+ %/)).toBeVisible();
+    await expect(page.getByText("Tema 1. La célula").first()).toBeVisible();
 
     await page.goto("/tutor");
     await page.getByLabel("Asignatura").selectOption({ label: "Matemáticas" });

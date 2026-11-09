@@ -77,6 +77,14 @@ export default async function SubjectPage({ params }: { params: Promise<{ id: st
                     <AlertTriangle className="h-3.5 w-3.5" /> {d.injectionFlags} aviso{d.injectionFlags > 1 ? "s" : ""}
                   </span>
                 )}
+                {d.ocrPages > 0 && (
+                  <span
+                    className={`rounded-md px-1.5 py-0.5 text-xs ${d.ocrConfidence !== null && d.ocrConfidence < 70 ? "bg-accent-soft text-accent" : "bg-surface-2 text-ink-3"}`}
+                    title="Texto reconocido automáticamente (OCR) a partir de una imagen o escaneado"
+                  >
+                    OCR · {Math.round(d.ocrConfidence ?? 0)} %{d.ocrConfidence !== null && d.ocrConfidence < 70 ? " · lectura dudosa" : ""}
+                  </span>
+                )}
                 <span className="text-xs text-ink-3">{d.pageCount && d.pageCount > 1 ? `${d.pageCount} págs.` : ""}</span>
                 {d.status === "ready" && <CheckCircle2 className="h-4 w-4 text-success" aria-label="Procesado" />}
                 {d.status === "processing" && <Loader2 className="h-4 w-4 animate-spin text-primary" aria-label="Procesando" />}

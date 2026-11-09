@@ -1,10 +1,11 @@
 import "server-only";
 
+import { combineConfidence, type OcrPage } from "./ocr-parse";
+
 /**
  * Document extraction. Output is a list of pages (PDF) or a single page
- * (DOCX/TXT/MD) of plain text. OCR for scanned PDFs/images is a Phase-2
- * pipeline step (see PROJECT_ARCHITECTURE.md §RAG); here we detect and report
- * "no extractable text" instead of silently producing an empty index.
+ * (DOCX/TXT/MD/image) of plain text. PDF pages without a text layer (scans)
+ * and images (photos of notes) go through local OCR (see ocr.ts).
  */
 
 export const ALLOWED_TYPES: Record<string, string> = {
@@ -12,16 +13,27 @@ export const ALLOWED_TYPES: Record<string, string> = {
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "docx",
   "text/plain": "txt",
   "text/markdown": "md",
+  "image/png": "png",
+  "image/jpeg": "jpg",
+  "image/webp": "webp",
 };
+
+/** A PDF page with fewer characters than this is treated as scanned. */
+const MIN_TEXT_PER_PAGE = 30;
 
 export const MAX_UPLOAD_BYTES = 15 * 1024 * 1024;
 
-export type Extracted = { pages: string[]; pageCount: number };
+export type OcrInfo = { pages: number; confidence: number | null; skippedPages: number };
+export type Extracted = { pages: string[]; pageCount: number; ocr: OcrInfo | null };
 
 /** Validate by magic bytes, not only by the client-provided MIME type. */
 export function sniffType(buf: Uint8Array, declared: string, filename: string): string | null {
   const head = Buffer.from(buf.subarray(0, 5)).toString("latin1");
   if (head.startsWith("%PDF-")) return "pdf";
+  if (buf[0] === 0x89 && head.slice(1, 4) === "PNG") return "png";
+  if (buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff) return "jpg";
+  const riff = Buffer.from(buf.subarray(0, 12)).toString("latin1");
+  if (riff.startsWith("RIFF") && riff.slice(8, 12) === "WEBP") return "webp";
   const isZip = buf[0] === 0x50 && buf[1] === 0x4b && buf[2] === 0x03 && buf[3] === 0x04;
   if (isZip && (declared.includes("wordprocessingml") || filename.toLowerCase().endsWith(".docx"))) return "docx";
   const lower = filename.toLowerCase();
@@ -44,20 +56,44 @@ export async function extractDocument(buf: Uint8Array, kind: string): Promise<Ex
       const { extractText, getDocumentProxy } = await import("unpdf");
       const pdf = await getDocumentProxy(new Uint8Array(buf));
       const { totalPages, text } = await extractText(pdf, { mergePages: false });
-      return { pages: text.map(normalizeText), pageCount: totalPages };
+      const pages = text.map(normalizeText);
+      const scanned = pages.flatMap((p, i) => (p.length < MIN_TEXT_PER_PAGE ? [i + 1] : []));
+      if (scanned.length === 0 || !(await ocrReady())) return { pages, pageCount: totalPages, ocr: null };
+      const { ocrPdfPages, MAX_OCR_PAGES } = await import("./ocr");
+      const results = await ocrPdfPages(buf, scanned);
+      for (const [n, r] of results) pages[n - 1] = normalizeText(r.text);
+      return { pages, pageCount: totalPages, ocr: ocrInfo([...results.values()], Math.max(0, scanned.length - MAX_OCR_PAGES)) };
+    }
+    case "png":
+    case "jpg":
+    case "webp": {
+      if (!(await ocrReady())) return { pages: [""], pageCount: 1, ocr: null };
+      const { ocrImage } = await import("./ocr");
+      const r = await ocrImage(buf, kind);
+      return { pages: [normalizeText(r.text)], pageCount: 1, ocr: ocrInfo([r], 0) };
     }
     case "docx": {
       const mammoth = await import("mammoth");
       // Convert to markdown-ish text keeping headings so topic detection works.
       const { value: html } = await mammoth.convertToHtml({ buffer: Buffer.from(buf) });
-      return { pages: [normalizeText(htmlToText(html))], pageCount: 1 };
+      return { pages: [normalizeText(htmlToText(html))], pageCount: 1, ocr: null };
     }
     case "txt":
     case "md":
-      return { pages: [normalizeText(new TextDecoder().decode(buf))], pageCount: 1 };
+      return { pages: [normalizeText(new TextDecoder().decode(buf))], pageCount: 1, ocr: null };
     default:
       throw new Error(`Tipo no soportado: ${kind}`);
   }
+}
+
+async function ocrReady() {
+  if (process.env.OCR_ENABLED === "false") return false;
+  const { ocrAvailable } = await import("./ocr");
+  return ocrAvailable();
+}
+
+function ocrInfo(results: OcrPage[], skippedPages: number): OcrInfo {
+  return { pages: results.length, confidence: combineConfidence(results), skippedPages };
 }
 
 export function htmlToText(html: string): string {

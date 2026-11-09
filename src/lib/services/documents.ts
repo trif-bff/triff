@@ -7,7 +7,9 @@ import { auditLog, chunks, documents, subjects, topics } from "@/db/schema";
 import { getEmbeddingModel } from "@/lib/ai/provider";
 import { chunkPages, normalizeTitle } from "@/lib/docs/chunk";
 import { extractDocument, MAX_UPLOAD_BYTES, sniffType } from "@/lib/docs/extract";
+import { imageSize, imageTooLarge } from "@/lib/docs/image-size";
 import { scanForInjection } from "@/lib/docs/injection";
+import { LOW_CONFIDENCE } from "@/lib/docs/ocr-parse";
 
 export class UploadError extends Error {
   constructor(message: string, public status = 400) {
@@ -38,7 +40,13 @@ export async function ingestDocument(opts: {
   if (opts.bytes.byteLength > MAX_UPLOAD_BYTES) throw new UploadError("El archivo supera 15 MB", 413);
 
   const kind = sniffType(opts.bytes, opts.declaredType, opts.filename);
-  if (!kind) throw new UploadError("Formato no soportado. Sube PDF, DOCX, TXT o MD.", 415);
+  if (!kind) throw new UploadError("Formato no soportado. Sube PDF, DOCX, TXT, MD o una foto (PNG, JPG, WEBP).", 415);
+  const isImage = kind === "png" || kind === "jpg" || kind === "webp";
+  if (isImage) {
+    const size = imageSize(opts.bytes);
+    if (!size) throw new UploadError("No se ha podido leer la imagen.", 415);
+    if (imageTooLarge(size)) throw new UploadError("La imagen es demasiado grande (máx. 40 megapíxeles).", 413);
+  }
 
   const filename = opts.filename.replace(/[^\p{L}\p{N}._ -]/gu, "_").slice(0, 160) || "documento";
   const sha256 = createHash("sha256").update(opts.bytes).digest("hex");
@@ -63,11 +71,15 @@ export async function ingestDocument(opts: {
     .returning();
 
   try {
-    const { pages, pageCount } = await extractDocument(opts.bytes, kind);
+    const { pages, pageCount, ocr } = await extractDocument(opts.bytes, kind);
     const charCount = pages.reduce((a, p) => a + p.length, 0);
     if (charCount < 50) {
       throw new UploadError(
-        "No se ha podido extraer texto. Si es un PDF escaneado o una foto, el OCR llegará en la próxima versión.",
+        ocr
+          ? "No se ha podido leer texto. Prueba con una foto más nítida, bien iluminada y con la hoja recta."
+          : isImage || kind === "pdf"
+            ? "No se ha podido extraer texto y el reconocimiento de texto (OCR) no está disponible en este servidor."
+            : "No se ha podido extraer texto del documento.",
         422,
       );
     }
@@ -88,15 +100,21 @@ export async function ingestDocument(opts: {
 
     await db
       .update(documents)
-      .set({ status: "ready", pageCount, charCount, injectionFlags: flags })
+      .set({ status: "ready", pageCount, charCount, injectionFlags: flags, ocrPages: ocr?.pages ?? 0, ocrConfidence: ocr?.confidence ?? null })
       .where(eq(documents.id, doc.id));
     await db.insert(auditLog).values({
       userId: opts.userId,
       action: "document.ingested",
       target: doc.id,
-      meta: { chunks: inserted.length, flags },
+      meta: { chunks: inserted.length, flags, ocrPages: ocr?.pages ?? 0 },
     });
-    return { id: doc.id, chunks: inserted.length, injectionFlags: flags, pageCount };
+    return {
+      id: doc.id,
+      chunks: inserted.length,
+      injectionFlags: flags,
+      pageCount,
+      ocr: ocr && { ...ocr, lowConfidence: ocr.confidence !== null && ocr.confidence < LOW_CONFIDENCE },
+    };
   } catch (e) {
     const message = e instanceof UploadError ? e.message : "Error procesando el documento";
     if (!(e instanceof UploadError)) console.error("[ingest]", e);

@@ -114,6 +114,8 @@ export const documents = pgTable(
     pageCount: integer("page_count"),
     charCount: integer("char_count"),
     injectionFlags: integer("injection_flags").notNull().default(0),
+    ocrPages: integer("ocr_pages").notNull().default(0),
+    ocrConfidence: real("ocr_confidence"), // 0–100, null when no OCR was needed
     error: text("error"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },

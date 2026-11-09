@@ -15,6 +15,13 @@
       "when": 1794250771767,
       "tag": "0001_mock_exams",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794251443767,
+      "tag": "0002_ocr",
+      "breakpoints": true
     }
   ]
 }

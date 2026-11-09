@@ -10,6 +10,8 @@
 | Sesiones | Cookies httpOnly, `Secure` en producción, caducidad 14 días | Better Auth | — |
 | Contraseñas | 10–128 caracteres, hash scrypt (Better Auth) | | E2E registro |
 | Subidas maliciosas | Magic bytes, 15 MB, UTF-8 estricto para texto, nombre saneado, deduplicación SHA-256; no se guarda el binario | `extract.ts`, `documents.ts` | Unit + integración |
+| Bombas de descompresión / abuso de CPU en OCR | Dimensiones leídas de la cabecera (máx. 40 MP, 12 000 px por lado) antes de decodificar; máx. 25 páginas de OCR; tiempo máximo de 60 s por página; `OMP_THREAD_LIMIT=1` | `image-size.ts`, `ocr.ts` | Unit + integración |
+| Inyección de comandos en OCR | `execFile` sin shell y argumentos fijos; los nombres de archivo del usuario nunca llegan a la línea de comandos; directorio temporal privado (`mkdtemp`) borrado en `finally` | `ocr.ts` | Revisión de código |
 | Prompt injection (documentos) | Fuentes como datos delimitados y neutralizados, instrucción explícita en el system prompt, detección y marcado `suspicious`, tutor sin herramientas con efectos | `injection.ts`, `prompts.ts` | Unit + integración con fixture malicioso |
 | Fuga de respuestas | Las respuestas correctas solo se envían tras entregar | `quiz/[id]/page.tsx` | E2E |
 | Secretos | Solo variables de entorno; hook que bloquea escribir claves; `.env*` ignorados | `.claude/hooks` | Hook probado |

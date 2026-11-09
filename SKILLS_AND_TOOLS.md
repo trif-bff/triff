@@ -67,4 +67,4 @@ Evaluados y **no instalados**:
 Retirada: `motion` (sin uso). Mantenimiento: `pnpm outdated` mensual; actualizar Next/AI SDK leyendo sus guías de migración; `pnpm audit` en CI.
 
 ## 6. Paquetes del sistema
-`postgresql-16-pgvector` (apt). Pendiente para OCR: `tesseract-ocr` + `tesseract-ocr-spa` (o visión del LLM).
+`postgresql-16-pgvector` (apt). OCR: `tesseract-ocr` 5.3.4 + `tesseract-ocr-spa`, `-cat` (Ubuntu, paquetes oficiales; mantenimiento con las actualizaciones del sistema) y `poppler-utils` (pdftoppm). Incluidos en el Dockerfile y la CI.
